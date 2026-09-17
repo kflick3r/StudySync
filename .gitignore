@@ -157,6 +157,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Environment variable template exception
+!.env.example
+
 # Spyder project settings
 .spyderproject
 .spyproject
