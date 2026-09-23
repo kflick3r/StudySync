@@ -1,5 +1,6 @@
 # Landing Page  
   
+```  
 ┌──────────────────────────────────────────────────────────┐  
 │                       StudySync                          │  
 │              AI-assisted NLP study companion             │  
@@ -17,13 +18,15 @@
 │                   [ Start Studying ]                     │  
 │                                                          │  
 └──────────────────────────────────────────────────────────┘  
-  
+```
+
 After clicking Start Studying, the notes should be saved in the Streamlit session so they don't have to paste them again when moving between tools.  
 
 # Study Choice Page  
   
 This essentially becomes the StudySync home screen after notes have been entered.  
 
+```
 ┌──────────────────────────────────────────────────────────┐  
 │ StudySync                                      NLP Study │  
 ├──────────────────────────────────────────────────────────┤  
@@ -52,11 +55,13 @@ This essentially becomes the StudySync home screen after notes have been entered
 │                                                          │  
 │                       [ Edit Notes ]                     │  
 └──────────────────────────────────────────────────────────┘  
+```
 
 Edit Notes gives the user a way back without resetting the whole app.  
   
 # Review Guide  
 
+```
 ┌──────────────────────────────────────────────────────────┐  
 │ StudySync                                   Review Guide │  
 ├──────────────────────────────────────────────────────────┤  
@@ -88,9 +93,11 @@ Edit Notes gives the user a way back without resetting the whole app.
 |                                                          |  
 | [ ← Study Home ]                         [ Edit Notes ]  |  
 └──────────────────────────────────────────────────────────┘  
+```
 
 # Flash Cards
 
+```
 ┌──────────────────────────────────────────────────────────┐  
 │ StudySync                                   Flash Cards  │  
 ├──────────────────────────────────────────────────────────┤  
@@ -113,9 +120,11 @@ Edit Notes gives the user a way back without resetting the whole app.
 |                                                          |  
 | [ ← Study Home ]                         [ Edit Notes ]  |  
 └──────────────────────────────────────────────────────────┘  
+```
 
 # Multiple Choice
 
+```
 ┌──────────────────────────────────────────────────────────┐  
 │ StudySync                               Multiple Choice  │  
 ├──────────────────────────────────────────────────────────┤  
@@ -147,9 +156,11 @@ Edit Notes gives the user a way back without resetting the whole app.
 |                                                          |  
 |  [ ← Study Home ]                       [ Edit Notes ]   |  
 └──────────────────────────────────────────────────────────┘  
+```
 
 # Short Response
 
+```
 ┌──────────────────────────────────────────────────────────┐  
 │ StudySync                                Short Response  │  
 ├──────────────────────────────────────────────────────────┤  
@@ -185,11 +196,12 @@ Edit Notes gives the user a way back without resetting the whole app.
 |                                                          |  
 |  [ ← Study Home ]                       [ Edit Notes ]   |  
 └──────────────────────────────────────────────────────────┘  
+```
 
 # Results
 Instead of a separate Session Summary page, Multiple Choice and Short Response can each end with a small results state:
 
-Practice Complete
+```
 ┌──────────────────────────────────────────────────────────┐  
 │ StudySync                             Practice Complete  │  
 ├──────────────────────────────────────────────────────────┤  
@@ -214,4 +226,4 @@ Practice Complete
 |                                                          |  
 |  [ ← Study Home ]                       [ Edit Notes ]   |  
 └──────────────────────────────────────────────────────────┘  
-
+```
