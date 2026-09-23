@@ -8,14 +8,14 @@ landing_page = st.Page(
     title="Add Notes"
 )
 
-study_home_page = st.Page(
-    "pages/study_home.py",
-    title="Study Home"
+study_tools_page = st.Page(
+    "pages/study_tools.py",
+    title="Study Tools"
 )
 
 pg = st.navigation([
     landing_page,
-    study_home_page
+    study_tools_page
 ])
 
 pg.run()
