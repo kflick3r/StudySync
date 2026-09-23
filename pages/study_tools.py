@@ -10,8 +10,7 @@ if "course_material" not in st.session_state:
     # Tells Steamlit to stop executing the current script
     st.stop()
 
-st.title("StudySync")
-
+st.title("StudySync - Study Tools")
 st.header("How do you want to study?")
 
 st.write("Review Guide")
