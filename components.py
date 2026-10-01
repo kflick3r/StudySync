@@ -77,5 +77,3 @@ def show_study_navigation():
         if st.button("Edit Notes", width="stretch"):
             # Open the confirmation dialog instead of navigating immediately.
             confirm_edit_notes()
-
-

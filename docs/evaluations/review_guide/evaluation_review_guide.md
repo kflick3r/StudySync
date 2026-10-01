@@ -241,3 +241,160 @@ Requirements:
   notation, symbols, operators, and terminology.
 - Do not change the meaning of technical statements when summarizing.
 
+
+#### Test 1 — Tokenization
+
+**Prompt Version:** V2
+
+**Rubric Score:** 20/20
+
+**Source Questions:** 5/5 answerable, 5/5 correct
+
+| Question | Answerable from guide? | Correct? |
+|---|---|---|
+| 1. What is tokenization and why is it important? | Yes | Yes |
+| 2. Why doesn't token = word? | Yes | Yes |
+| 3. Why is there no universally correct tokenization? | Yes | Yes |
+| 4. What is the difference between symbolic and stochastic approaches? | Yes | Yes |
+| 5. How does BPE address the unknown-word problem? | Yes | Yes |
+
+**Notes:**
+
+V2 preserved the major concepts from the source material while retaining more of the supporting examples and technical details. It correctly preserved the distinction between BPE being data-driven and standard BPE being deterministic once its training procedure is fixed. It also retained the UTF-8 detail and the course-file references.
+
+The main issue observed was a minor formatting problem in the BPE conceptual flow, where the arrows and text were rendered without spacing. This did not affect the content or answerability of the guide.
+
+
+#### **Test 2 — Logistic Regression**
+
+**Prompt Version:** V2
+
+**Rubric Score:** 20/20
+
+**Source Questions:** 5/5 answerable, 5/5 correct
+
+| Question | Answerable from guide? | Correct? |
+|---|---|---|
+| 1. What is logistic regression and what does it model? | Yes | Yes |
+| 2. How does the classification threshold affect predictions? | Yes | Yes |
+| 3. How is the decision boundary determined for a single predictor? | Yes | Yes |
+| 4. What are the logit and sigmoid function, and how are they related? | Yes | Yes |
+| 5. How do feature weights affect the classification decision? | Yes | Yes |
+
+**Notes:**
+
+V2 preserved the major concepts from the source material, including the classification threshold, decision boundary, logistic function, logit form, relationship between β notation and vector notation, and interpretation of feature weights. It also retained important examples such as the 0.1 classification threshold, the w = 1 and b = 2 decision-boundary example, and the sentiment-classification weight examples.
+
+The guide appropriately indicated when referenced material was unavailable rather than attempting to fill in the missing information. The mathematical notation also rendered correctly in the StudySync interface.
+
+
+#### **Test 3 — Naive Bayes**
+
+**Prompt Version:** V2
+
+**Rubric Score:** 20/20
+
+**Source Questions:** 5/5 answerable, 5/5 correct
+
+| Question | Answerable from guide? | Correct? |
+|---|---|---|
+| 1. What assumption does Naive Bayes make about the evidence? | Yes | Yes |
+| 2. What are the prior, likelihood, and posterior in Naive Bayes? | Yes | Yes |
+| 3. How does Naive Bayes use probabilities to classify a document? | Yes | Yes |
+| 4. What is the difference between Binary and Multinomial Naive Bayes? | Yes | Yes |
+| 5. Why can Naive Bayes work well despite its independence assumption? | Yes | Yes |
+
+**Notes:**
+
+V2 preserved the major concepts from the source material, including conditional independence, the Naive Bayes formula, prior/likelihood/posterior, inference, Binary vs. Multinomial Naive Bayes, computational efficiency, applications, advantages, and limitations. It also retained important examples such as "first" and "quarter" and the distinction between word presence and word frequency.
+
+The guide preserved the graphical structure and mathematical notation from the source material without adding unsupported concepts. It also retained the explanation that Naive Bayes can perform well despite its often-false independence assumption.
+
+
+#### **Test 4 — N-Grams**
+
+**Prompt Version:** V2
+
+**Rubric Score:** 20/20
+
+**Source Questions:** 5/5 answerable, 5/5 correct
+
+| Question | Answerable from guide? | Correct? |
+|---|---|---|
+| 1. What does the chain rule of probability do for a sequence of words? | Yes | Yes |
+| 2. What is the Markov assumption, and how does it relate to N-grams? | Yes | Yes |
+| 3. How are N-gram probabilities estimated using MLE? | Yes | Yes |
+| 4. Why are log probabilities used when computing language model probabilities? | Yes | Yes |
+| 5. What engineering techniques can be used to improve the storage and efficiency of N-gram models? | Yes | Yes |
+
+**Notes:**
+
+V2 preserved the major concepts from the source material, including the chain rule, Markov assumption, N-gram models, Maximum Likelihood Estimation, sentence boundary symbols, log probabilities, numerical underflow, and engineering techniques for storing and scaling N-gram models.
+
+The guide retained the important mathematical formulas and distinctions between bigrams, trigrams, and general N-grams. It also preserved the engineering details about quantization, 64-bit hashes, data structures, pruning, and Infini-gram. The generated mathematical notation rendered correctly in the StudySync interface.
+
+
+#### **Test 5 — Regular Expressions**
+
+**Prompt Version:** V2
+
+**Rubric Score:** 20/20
+
+**Source Questions:** 5/5 answerable, 5/5 correct
+
+| Question | Answerable from guide? | Correct? |
+|---|---|---|
+| 1. What are regular expressions, and what are some of their uses in NLP? | Yes | Yes |
+| 2. What do common regex operators such as `?`, `*`, `+`, and `{n}` do? | Yes | Yes |
+| 3. What is the difference between greedy and non-greedy matching? | Yes | Yes |
+| 4. How can regexes be used to manage false positives and false negatives? | Yes | Yes |
+| 5. How are regular expressions used in BPE pre-tokenization? | Yes | Yes |
+
+**Notes:**
+
+V2 preserved the major concepts from the source material, including character classes, ranges, negation, counting operators, anchors, boundaries, grouping, precedence, greediness, precision and recall, character-class aliases, substitutions, capture groups, lookaheads, and BPE pre-tokenization.
+
+The guide retained a large number of the original technical examples and regex patterns, including the GPT-2 pre-tokenization regex and Unicode properties. It also preserved the distinction between different uses of the caret (`^`) and between greedy and non-greedy operators. A minor formatting issue occurred in the escaping examples, but it did not affect the substantive content or answerability of the guide.
+
+
+## V1 vs. V2 Comparison
+
+The V2 prompt was created in response to issues identified during the V1 evaluation. V1 performed strongly overall, but the evaluation identified minor problems with mathematical formatting and technical accuracy, as well as some loss of supporting examples and details when working from raw textbook material.
+
+V2 added three main requirements:
+- Preserve important examples when they help explain or distinguish a concept.
+- Preserve technical details accurately, including mathematical formulas, notation, symbols, operators, and terminology.
+- Do not change the meaning of technical statements when summarizing.
+
+### Overall Results
+
+| Version | Accuracy | Coverage | Relevance | Organization | Total |
+|---|---:|---:|---:|---:|---:|
+| V1 | 23/25 | 24/25 | 25/25 | 25/25 | **97/100** |
+| V2 | 25/25 | 25/25 | 25/25 | 25/25 | **100/100** |
+
+### Source Question Results
+
+Both versions successfully passed all five source-question tests.
+
+| Version | Questions Answerable | Questions Correct |
+|---|---:|---:|
+| V1 | 25/25 | 25/25 |
+| V2 | 25/25 | 25/25 |
+
+The source-question test therefore did not distinguish between the two prompt versions. Both versions produced guides that contained enough information to answer the selected questions correctly.
+
+### Observed Differences
+
+V1's main weaknesses appeared in the rubric-based evaluation rather than the source-question test. The Logistic Regression test received 4/5 for Accuracy because of a mathematical formatting problem, while the Regular Expressions test received 4/5 for Accuracy because of a minor technical error involving the dollar-sign anchor. The N-Grams test received 4/5 for Coverage because some supporting examples and textbook details were omitted.
+
+V2 addressed the goals identified from those results. The Logistic Regression guide preserved the mathematical relationships and rendered the notation correctly in the StudySync interface. The N-Grams guide retained more of the mathematical formulas and engineering details from the source material. The Regular Expressions guide retained more technical examples and regex patterns, including the GPT-2 pre-tokenization regex and Unicode properties.
+
+### Interpretation
+
+The V2 results provide evidence that the additional prompt requirements improved preservation of technical details and supporting examples without reducing the guide's ability to answer source-based questions.
+
+However, the results should be interpreted cautiously. The evaluation used only five test sets, and the first three source sets were structured notes created with LLM assistance, while the final two were raw textbook material. This difference in source type makes it difficult to attribute all observed differences solely to the prompt change.
+
+The V2 results therefore support continuing with the revised prompt as the current baseline, while additional testing would be useful before considering the prompt finalized.
+

@@ -225,3 +225,6 @@ __marimo__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Private StudySync evaluation experiments
+/evaluation_results/
