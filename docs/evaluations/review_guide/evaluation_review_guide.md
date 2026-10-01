@@ -1,4 +1,4 @@
-# **Evaluation Results**
+# **Review Guide Evaluation Results**
 
 ## V1 Prompt
 
@@ -394,7 +394,109 @@ V2 addressed the goals identified from those results. The Logistic Regression gu
 
 The V2 results provide evidence that the additional prompt requirements improved preservation of technical details and supporting examples without reducing the guide's ability to answer source-based questions.
 
-However, the results should be interpreted cautiously. The evaluation used only five test sets, and the first three source sets were structured notes created with LLM assistance, while the final two were raw textbook material. This difference in source type makes it difficult to attribute all observed differences solely to the prompt change.
-
 The V2 results therefore support continuing with the revised prompt as the current baseline, while additional testing would be useful before considering the prompt finalized.
 
+V3 will continue to use the V2 prompt requirements while adding a section that identifies potentially incorrect, contradictory, or unclear information in the source material for the student to review.
+
+---
+
+## V3 Prompt
+
+You are an AI study assistant helping a college student study Natural Language Processing.
+
+Create a clear review guide from the course material provided below.
+
+Requirements:
+- Use only information supported by the provided course material.
+- Do not invent facts or add outside information.
+- Identify and organize the major concepts, definitions, relationships,
+  examples, and important supporting details.
+- Preserve important examples when they help explain or distinguish a concept.
+- Preserve technical details accurately, including mathematical formulas,
+  notation, symbols, operators, and terminology.
+- Do not change the meaning of technical statements when summarizing.
+- Preserve important distinctions between related concepts.
+- Use clear headings and concise explanations.
+- Write the guide for a student studying an NLP course.
+- If the notes are unclear or incomplete, do not guess. Indicate that
+  the information is unclear or missing.
+
+IMPORTANT:
+If the provided course material contains a statement that appears
+potentially incorrect, contradictory, or unclear, do not silently correct it.
+
+Instead, include a final section titled:
+
+## Notes to Review for Correctness
+
+For each potentially incorrect or unclear statement:
+1. Quote or closely reproduce the relevant statement from the notes.
+2. Explain briefly why the statement may need verification.
+   Focus on contradictions, ambiguity, or conflicts within the provided 
+   course material. Do not provide a corrected answer unless the 
+   provided course material itself establishes the correction.
+3. Provide a concise search topic that the student can use to verify the statement using a trusted external source.
+4. Write the search topic on its own line in this exact format:
+
+**Suggested verification topic:** [search topic]
+
+Important formatting rules:
+- Write the search topic as plain text.
+- Do not create a hyperlink yourself.
+- Include only one Suggested verification topic for each flagged statement.
+- Do not repeat the same verification topic.
+
+Do not claim that a statement is definitely wrong unless the provided 
+course material itself establishes that it is wrong.
+
+Do not flag a statement merely because it is technical, unfamiliar, 
+or incomplete. Only flag statements when there is a meaningful reason 
+that the student should verify it.
+
+---
+
+#### Test 1 — Tokenization
+
+**Source Type:** Structured notes created with LLM assistance with three deliberate mistakes
+
+**Prompt Version:** V3
+
+**Rubric Score:** 20/20
+
+| Criterion | Score |
+|---|---:|
+| Accuracy | 5/5 |
+| Coverage | 5/5 |
+| Relevance | 5/5 |
+| Organization | 5/5 |
+| **Total** | **20/20** |
+
+
+**Source Questions:** 5/5
+
+| Question | Answerable from guide? | Correct? |
+|---|---|---|
+| 1. What is tokenization and why is it important? | Yes | Yes |
+| 2. Why doesn't token = word? | Yes | Yes |
+| 3. Why no universally correct tokenization? | Yes | Yes |
+| 4. Symbolic vs. stochastic? | Yes | Yes |
+| 5. How does BPE address unknown words? | Yes | Yes |
+
+
+**Correctness Detection:** 2/2 intentional issues flagged
+
+| Intentional issue | Detected? |
+|---|---|
+| Incorrect/contradictory definition of stochastic approaches | Yes |
+| Incorrect description of BPE as merging randomly selected pairs | Yes |
+
+
+**Notes:**
+
+The V3 Review Guide preserved the major concepts from the source notes while also identifying both intentionally introduced questionable statements. The guide specifically flagged the definition of stochastic approaches as contradictory and flagged the description of BPE as merging randomly selected adjacent units.
+
+For each flagged statement, the guide preserved the questionable claim, explained why it should be verified, and provided a suggested verification topic. StudySync then converted each verification topic into a clickable Google Search link.
+
+The generated guide did sometimes include the likely correction within the explanation—for example, noting that standard BPE typically selects the most frequent adjacent pair. This is worth monitoring in future tests because the intended behavior is to encourage verification rather than present the AI's correction as authoritative.
+
+The V3 test therefore demonstrates that the new correctness-review feature is functioning as intended, while leaving a small area for further evaluation.
