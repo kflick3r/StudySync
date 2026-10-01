@@ -10,7 +10,6 @@ from google import genai
 # URL construction approach developed with AI assistance
 # ------------------------
 
-
 def create_google_search_link(search_topic):
     query = quote_plus(search_topic)
     return f"https://www.google.com/search?q={query}"
@@ -70,26 +69,26 @@ Instead, include a final section titled:
 For each potentially incorrect or unclear statement:
 1. Quote or closely reproduce the relevant statement from the notes.
 2. Explain briefly why the statement may need verification.
-3. Provide a concise search topic that the student can use to verify it.
+   Focus on contradictions, ambiguity, or conflicts within the provided 
+   course material. Do not provide a corrected answer unless the 
+   provided course material itself establishes the correction.
+3. Provide a concise search topic that the student can use to verify the statement using a trusted external source.
 4. Write the search topic on its own line in this exact format:
 
 **Suggested verification topic:** [search topic]
 
-Do not claim that a statement is definitely wrong unless the provided
+Important formatting rules:
+- Write the search topic as plain text.
+- Do not create a hyperlink yourself.
+- Include only one Suggested verification topic for each flagged statement.
+- Do not repeat the same verification topic.
+
+Do not claim that a statement is definitely wrong unless the provided 
 course material itself establishes that it is wrong.
 
-Do not flag a statement merely because it is technical, unfamiliar,
-or incomplete. Only flag statements when there is a meaningful reason
-that the student should verify them.
-
-End the guide with:
-
-> **AI-generated content can contain mistakes. Check important information
-> against your course materials or other trusted sources.**
-
-> **Remember:** StudySync uses AI to help organize and review your notes.
-> Use the suggested sources to verify important information rather than
-> treating the AI-generated review as the final authority.
+Do not flag a statement merely because it is technical, unfamiliar, 
+or incomplete. Only flag statements when there is a meaningful reason 
+that the student should verify it.
 
 Course material:
 {course_material}

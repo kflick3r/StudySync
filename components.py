@@ -1,5 +1,32 @@
 import streamlit as st
 
+
+# AI Content Warning with CSS Styling to be used in footer
+def show_ai_disclaimer():
+    st.markdown(
+        """
+        <div style="
+            text-align: center;
+            font-size: 0.90rem;
+            color: #777;
+            margin-top: 1.5rem;
+            line-height: 1.4;
+        ">
+            <strong>AI-generated content can contain mistakes.</strong>
+            Check important information against your course materials
+            or other trusted sources.
+            <br><br>
+            <strong>Remember:</strong> StudySync uses AI to help organize
+            and review your notes. Use your course materials and trusted
+            sources to verify important information rather than treating
+            AI-generated content as the final authority.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+
 # Display a confirmation dialog before returning to the notes page.
 # The user's current notes are preserved, but saving changes later
 # will require generated study materials to be recreated.
@@ -72,8 +99,11 @@ def show_study_navigation():
         if st.button("← Study Tools", width="stretch"):
             st.switch_page("pages/study_tools.py")
 
-    # Return to the Landing Page
+    # Edit Notes
     with bottom_col2:
         if st.button("Edit Notes", width="stretch"):
             # Open the confirmation dialog instead of navigating immediately.
             confirm_edit_notes()
+
+    #AI Content Warning
+    show_ai_disclaimer()
