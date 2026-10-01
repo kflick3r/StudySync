@@ -75,6 +75,14 @@ This provides a simple, QAGS-inspired test of both accuracy and coverage.
 
 The result is recorded as the number of questions answered correctly out of five.
 
+## Evaluation Limitations
+
+The initial evaluation uses NLP notes that were generated with the assistance of another LLM during the development of the user's course notes. The notes are therefore already structured, summarized, and organized before being provided to StudySync.
+
+This means the initial tests primarily evaluate whether Gemini can transform well-structured educational material into a useful Review Guide. They do not yet establish how StudySync performs on raw or unstructured course material.
+
+Future testing will include source material that has not been previously summarized or structured by an LLM, such as raw textbook excerpts, lecture material, instructor-provided materials, or less organized student notes.
+
 ## Evaluation Results
 
 ### Test 1 — Tokenization
@@ -138,3 +146,67 @@ The Review Guide captured the major concepts from the source notes, including cl
 The main issue identified was mathematical formatting. The logistic function was not rendered clearly in the generated output, making the formula difficult to interpret accurately.
 
 The guide also appropriately identified that the provided notes referenced estimating the regression coefficients without providing the details needed to explain that process.
+
+
+### Test 3 — Naive Bayes
+
+**Prompt Version:** V1
+
+**Rubric Score:** 20/20
+
+| Criterion | Score |
+|---|---:|
+| Accuracy | 5/5 |
+| Coverage | 5/5 |
+| Relevance | 5/5 |
+| Organization | 5/5 |
+| **Total** | **20/20** |
+
+**Source Questions:** 5/5
+
+**Notes:**
+
+The Review Guide preserved the major concepts from the source notes, including the conditional independence assumption, the Naive Bayes formula, prior/likelihood/posterior, inference, computational efficiency, text classification, and the distinction between Binary and Multinomial Naive Bayes.
+
+The guide also preserved the important limitation that the independence assumption is generally false while explaining why Naive Bayes can still perform well.
+
+## Baseline Summary from Personal Notes
+
+The first three tests used Prompt V1 and structured NLP notes that had previously been developed with LLM assistance.
+
+| Test | Accuracy | Coverage | Relevance | Organization | Total | Questions |
+|---|---:|---:|---:|---:|---:|---:|
+| Tokenization | 5/5 | 5/5 | 5/5 | 5/5 | **20/20** | **5/5** |
+| Logistic Regression | 4/5 | 5/5 | 5/5 | 5/5 | **19/20** | **5/5** |
+| Naive Bayes | 5/5 | 5/5 | 5/5 | 5/5 | **20/20** | **5/5** |
+
+These results provide an initial baseline for Prompt V1. Additional testing with raw or less-structured source material is needed before making changes to the prompt or drawing broader conclusions about StudySync's performance.
+
+
+### Test 4 — N-Grams and Language Models
+
+**Source Type:** Raw textbook material
+
+**Prompt Version:** V1
+
+**Rubric Score:** 19/20
+
+| Criterion | Score |
+|---|---:|
+| Accuracy | 5/5 |
+| Coverage | 4/5 |
+| Relevance | 5/5 |
+| Organization | 5/5 |
+| **Total** | **19/20** |
+
+**Source Questions:** 5/5
+
+**Notes:**
+
+This test used raw textbook material rather than notes previously summarized and organized with LLM assistance.
+
+The Review Guide accurately captured the major concepts, including the chain rule, Markov assumption, N-gram models, MLE, log probabilities, longer context, and large-scale language-model considerations.
+
+Coverage was reduced to 4/5 because the generated guide omitted some specific examples and supporting details from the textbook, including parts of the Berkeley Restaurant Project example, concrete probability calculations, and some discussion of linguistic and cultural phenomena captured by bigram statistics.
+
+The guide nevertheless retained the information needed to answer all five source questions correctly.
