@@ -21,6 +21,10 @@ if st.button("Start Studying"):
     if course_material:
         # Session state persists across apps inside a multipage app
         st.session_state.course_material = course_material
+
+        # Clear the previous review guide when course material changes
+        st.session_state.pop("review_guide", None)
+        
         #When notes are entered, navigate to the study tools selection page
         st.switch_page("pages/study_tools.py")
     else:
