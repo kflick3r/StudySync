@@ -29,10 +29,20 @@ The MVP will be built with:
 * **Python**
 * **Streamlit**
 * **HTML/CSS** for optional interface customization
-* **One LLM API**
+* **Gemini API**
 * **Plain text / Markdown** course material
 
 The application will initially run locally in a web browser, with deployment planned after the core MVP is functional and tested.
+
+### AI-Assisted Development
+
+AI assistance was used during development to design the URL construction for converting verification topics into Google Search links. The implementation was reviewed and adapted as part of the StudySync application.
+
+AI-generated content and code were reviewed and tested before being incorporated into the project.
+
+### AI in the StudySync Application
+
+StudySync uses the Gemini API to generate study materials from student-provided course material. The application is designed to keep generated content grounded in the student's source material and to identify potentially incorrect or unclear information rather than silently presenting AI-generated information as authoritative.
 
 ## Project Goals
 

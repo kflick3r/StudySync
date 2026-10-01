@@ -1,45 +1,5 @@
-import re
-from urllib.parse import quote_plus
+# StudySync Review Guide Prompt — V3
 
-import streamlit as st
-from google import genai
-
-
-# ------------------------
-# URL generation
-# URL construction approach developed with AI assistance
-# ------------------------
-
-
-def create_google_search_link(search_topic):
-    query = quote_plus(search_topic)
-    return f"https://www.google.com/search?q={query}"
-
-
-def add_verification_links(review_guide):
-    pattern = r"\*\*Suggested verification topic:\*\*\s*(.+)"
-
-    def replace_topic(match):
-        search_topic = match.group(1).strip()
-        url = create_google_search_link(search_topic)
-
-        return f"**Suggested verification:** [{search_topic}]({url})"
-
-    return re.sub(pattern, replace_topic, review_guide)
-
-
-# ------------------------
-# Gemini Prompt
-# ------------------------
-
-def generate_review_guide(course_material):
-    """Generate a review guide from the user's course material."""
-
-    client = genai.Client(
-        api_key=st.secrets["GEMINI_API_KEY"]
-    )
-
-    prompt = f"""
 You are an AI study assistant helping a college student study Natural Language Processing.
 
 Create a clear review guide from the course material provided below.
@@ -90,16 +50,3 @@ End the guide with:
 > **Remember:** StudySync uses AI to help organize and review your notes.
 > Use the suggested sources to verify important information rather than
 > treating the AI-generated review as the final authority.
-
-Course material:
-{course_material}
-"""
-
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt
-    )
-
-    review_guide = response.text
-
-    return add_verification_links(review_guide)
