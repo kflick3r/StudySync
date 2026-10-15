@@ -8,18 +8,17 @@ def show_ai_disclaimer():
         <div style="
             text-align: center;
             font-size: 0.90rem;
-            color: #777;
-            margin-top: 1.5rem;
+            color: #A8A8A8;
+            margin: 1.5rem auto 0 auto;
+            max-width: 550px;
             line-height: 1.4;
         ">
-            <strong>AI-generated content can contain mistakes.</strong>
-            Check important information against your course materials
-            or other trusted sources.
-            <br><br>
-            <strong>Remember:</strong> StudySync uses AI to help organize
-            and review your notes. Use your course materials and trusted
-            sources to verify important information rather than treating
-            AI-generated content as the final authority.
+            <strong style="color: #D0D0D0;">AI-Generated Content Notice</strong>
+            <br>
+            StudySync's flashcards and practice questions are generated
+            from your notes and are not independently fact-checked.
+            Use the Review Guide to flag <strong>potential</strong> inaccuracies,
+            and always verify important information with trusted sources.
         </div>
         """,
         unsafe_allow_html=True
