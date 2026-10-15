@@ -15,6 +15,16 @@ course_material = st.text_area(
     height=300
 )
 
+st.warning(
+    "**Before You Start Studying**\n\n"
+    "StudySync generates flashcards, multiple-choice questions, "
+    "and short-response exercises based on your submitted course materials. "
+    "These tools do not independently verify the accuracy of your notes.\n\n"
+    "**We recommend starting with the Review Guide** to identify "
+    "information that may be incorrect or need further verification "
+    "before using the other study tools."
+)
+
 # Save the course material when the user is ready to study.
 if st.button("Start Studying"):
     #Check that there was something entered
