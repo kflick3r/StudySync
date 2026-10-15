@@ -50,7 +50,16 @@ def confirm_edit_notes():
             # Send the user back to the landing page.
             st.switch_page("pages/landing.py")
 
-            
+# Track page navigation to reset the flashcard view when returning
+# from another page, while preserving the generated flashcards.
+def track_page_navigation(current_page):
+    previous_page = st.session_state.get("previous_page")
+
+    if current_page == "flashcards" and previous_page != "flashcards":
+        st.session_state.current_flashcard_index = 0
+        st.session_state.show_flashcard_answer = False
+
+    st.session_state.previous_page = current_page
 
 # Create a function for the footer of every page
 def show_study_navigation():

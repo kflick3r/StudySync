@@ -1,5 +1,9 @@
 import streamlit as st
 
+from components import track_page_navigation
+track_page_navigation("landing")
+
+
 st.title("StudySync")
 st.write("An AI-assisted NLP Study Companion")
 

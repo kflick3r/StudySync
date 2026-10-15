@@ -1,5 +1,9 @@
 import streamlit as st
 
+from components import track_page_navigation
+track_page_navigation("study_tools")
+
+
 # Can't access this page without entering study notes
 if "course_material" not in st.session_state:
     st.warning("Please add your course material before choosing a study tool.")

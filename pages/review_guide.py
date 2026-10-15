@@ -2,6 +2,8 @@ import streamlit as st
 from components import show_study_navigation
 from services.gemini import generate_review_guide
 
+from components import track_page_navigation
+track_page_navigation("review_guide")
 
 st.title("Review Guide")
 

@@ -3,6 +3,9 @@ import random
 from components import show_study_navigation
 from services.gemini import generate_flashcards
 
+from components import track_page_navigation
+track_page_navigation("flashcards")
+
 # ------------------------------------
 # Title and Generate Flashcard Button
 # ------------------------------------
