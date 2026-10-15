@@ -69,31 +69,49 @@ else:
             f"of {total_flashcards}"
         )
 
-        st.markdown(
-            f"### {current_flashcard['question']}"
-        )
+        # Give the flashcard a border
+        with st.container(border=True):
 
-        # Reveal or hide the answer
-        if st.session_state.show_flashcard_answer:
-            st.write(current_flashcard["answer"])
+            # Display the Question centered
+            # ### = Markdown header 3
+            st.markdown(
+                f"### {current_flashcard['question']}",
+                text_alignment="center",
+            )
 
-            if st.button("Hide Answer"):
-                st.session_state.show_flashcard_answer = False
-                st.rerun()
+            # Display the answer if it has been revealed
+            if st.session_state.show_flashcard_answer:
+                st.markdown(
+                    current_flashcard["answer"],
+                    text_alignment="center"
+                )
 
-        else:
-            if st.button("Reveal Answer"):
-                st.session_state.show_flashcard_answer = True
-                st.rerun()
+            # Create three columns to center the buttons
+            left_column, center_column, right_column = st.columns([1, 1, 1])
 
-        st.divider()
+            with center_column:
 
+                # If the answer is visible, show the Hide Answer button
+                if st.session_state.show_flashcard_answer:
+                    if st.button("Hide Answer", use_container_width=True):
+                        st.session_state.show_flashcard_answer = False
+                        # Rerun the page to hide the answer
+                        st.rerun()
+
+                # Otherwise, show the Reveal Answer button
+                else:
+                    if st.button("Reveal Answer", use_container_width=True):
+                        st.session_state.show_flashcard_answer = True
+                        # Rerun the page to show the answer
+                        st.rerun()
+            
         # Navigation buttons
         previous_column, next_column = st.columns(2)
 
         with previous_column:
            if st.button(
                 "Previous",
+                # Disable the "previous" button on the first question
                 disabled=(current_flashcard_index == 0)
             ):
                 st.session_state.current_flashcard_index -= 1
@@ -103,6 +121,7 @@ else:
         with next_column:
             if st.button(
                 "Next",
+                # Disable the "next" button on the last question
                 disabled=(
                     current_flashcard_index == total_flashcards - 1
                 )
@@ -110,8 +129,6 @@ else:
                 st.session_state.current_flashcard_index += 1
                 st.session_state.show_flashcard_answer = False
                 st.rerun()
-
-
 
 # Page Footer
 show_study_navigation()
