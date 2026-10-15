@@ -6,11 +6,9 @@
     </content>
     <orderEntry type="jdk" jdkName="~\Documents\Portfolio_Projects\StudySync\.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="NLP" />
   </component>
-  <component name="PackageRequirementsSettings" />
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />
   </component>
-  <component name="ReSTService" />
-  <component name="TestRunnerService" />
 </module>

@@ -46,49 +46,70 @@ Create a clear review guide from the course material provided below.
 Requirements:
 - Use only information supported by the provided course material.
 - Do not invent facts or add outside information.
-- Identify and organize the major concepts, definitions, relationships,
-  examples, and important supporting details.
+- Identify and organize the major concepts, definitions, relationships, examples, and important supporting details.
 - Preserve important examples when they help explain or distinguish a concept.
-- Preserve technical details accurately, including mathematical formulas,
-  notation, symbols, operators, and terminology.
+- Preserve technical details accurately, including mathematical formulas, notation, symbols, operators, and terminology.
 - Do not change the meaning of technical statements when summarizing.
 - Preserve important distinctions between related concepts.
 - Use clear headings and concise explanations.
 - Write the guide for a student studying an NLP course.
-- If the notes are unclear or incomplete, do not guess. Indicate that
-  the information is unclear or missing.
+- If the notes are unclear or incomplete, do not guess. Indicate that the information is unclear or missing.
 
-IMPORTANT:
-If the provided course material contains a statement that appears
-potentially incorrect, contradictory, or unclear, do not silently correct it.
 
-Instead, include a final section titled:
+IMPORTANT — FACTUAL ACCURACY REVIEW:
+
+After generating the review guide, independently examine the original course material for potential factual inaccuracies.
+
+This review is intended to identify meaningful factual concerns, not to find errors in every set of notes.
+
+A result of ZERO flagged statements is completely acceptable.
+
+Only flag a statement when:
+- It makes a specific factual claim that appears inaccurate.
+- It directly contradicts another statement in the notes.
+- It contains a technical or mathematical error that materially changes the meaning of the concept.
+
+Do NOT flag a statement simply because:
+- It is simplified for educational purposes.
+- It omits additional details or context.
+- It uses different terminology than you would prefer.
+- It could be explained more thoroughly.
+- It discusses a complex topic with multiple valid interpretations.
+- You are uncertain whether it is correct.
+- You need to populate the review section.
+
+For each potential error, you must be able to identify a specific reason the statement warrants verification.
+
+If you cannot identify a specific factual concern, do not flag the statement.
+
+Do not introduce outside information into the review guide.
+You may use your existing knowledge to recognize potential factual concerns, but treat these as unverified suspicions, not established corrections.
+
+Do not provide corrected answers based on your own knowledge. The student should independently verify the information.
+
+OUTPUT FORMAT:
+
+If one or more meaningful potential inaccuracies are found, include a final section titled:
 
 ## Notes to Review for Correctness
 
-For each potentially incorrect or unclear statement:
-1. Quote or closely reproduce the relevant statement from the notes.
-2. Explain briefly why the statement may need verification.
-   Focus on contradictions, ambiguity, or conflicts within the provided 
-   course material. Do not provide a corrected answer unless the 
-   provided course material itself establishes the correction.
-3. Provide a concise search topic that the student can use to verify the statement using a trusted external source.
+For each flagged statement:
+1. Quote the exact statement from the original notes.
+2. Briefly explain the specific factual concern.
+3. Provide a concise search topic for independent verification.
 4. Write the search topic on its own line in this exact format:
 
 **Suggested verification topic:** [search topic]
 
-Important formatting rules:
-- Write the search topic as plain text.
-- Do not create a hyperlink yourself.
-- Include only one Suggested verification topic for each flagged statement.
-- Do not repeat the same verification topic.
+Do not create hyperlinks yourself.
+Include only one verification topic per flagged statement.
+Do not repeat verification topics.
 
-Do not claim that a statement is definitely wrong unless the provided 
-course material itself establishes that it is wrong.
+If no meaningful potential inaccuracies are identified, include the section with only this sentence:
 
-Do not flag a statement merely because it is technical, unfamiliar, 
-or incomplete. Only flag statements when there is a meaningful reason 
-that the student should verify it.
+"No potential factual inaccuracies identified in the provided notes."
+
+Do not invent concerns to populate this section.
 
 Course material:
 {course_material}
