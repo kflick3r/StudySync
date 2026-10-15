@@ -25,18 +25,37 @@ st.warning(
     "before using the other study tools."
 )
 
-# Save the course material when the user is ready to study.
+
+# Save the course material when the user is ready to study
 if st.button("Start Studying"):
-    #Check that there was something entered
-    if course_material:
-        # Session state persists across apps inside a multipage app
+
+    # Check that the student entered material
+    if course_material.strip():
+
+        # Compare submitted notes with previously saved notes
+        notes_have_changed = (
+            course_material != st.session_state.get("course_material", "")
+        )
+
+        # Save the submitted course material
         st.session_state.course_material = course_material
 
-        # Clear the previous review guide when course material changes
-        st.session_state.pop("review_guide", None)
-        
-        #When notes are entered, navigate to the study tools selection page
+        # Reset generated content only when the notes change
+        if notes_have_changed:
+
+            # Clear the previous review guide
+            st.session_state.pop("review_guide", None)
+
+            # Clear previously generated flashcards
+            st.session_state.flashcards = []
+
+            # Reset flashcard navigation
+            st.session_state.current_flashcard_index = 0
+            st.session_state.show_flashcard_answer = False
+
+        # Navigate to the study tools selection page
         st.switch_page("pages/study_tools.py")
+
     else:
-        # Prevent the user from continuing without course material.
+        # Prevent continuing without course material
         st.warning("Please add some course material before starting.")
