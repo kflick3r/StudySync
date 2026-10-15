@@ -4,6 +4,7 @@ from urllib.parse import quote_plus
 import streamlit as st
 from google import genai
 
+import json
 
 # ------------------------
 # URL generation
@@ -27,9 +28,9 @@ def add_verification_links(review_guide):
     return re.sub(pattern, replace_topic, review_guide)
 
 
-# ------------------------
-# Gemini Prompt
-# ------------------------
+# -------------------------------
+# Gemini Prompt for Review Guide
+# -------------------------------
 
 def generate_review_guide(course_material):
     """Generate a review guide from the user's course material."""
@@ -123,3 +124,94 @@ Course material:
     review_guide = response.text
 
     return add_verification_links(review_guide)
+
+
+# -----------------------------
+# Gemini Prompt for Flashcards
+# JSON construction approach developed with AI assistance
+# -----------------------------
+
+
+def generate_flashcards(course_material):
+    """Generate flashcards from the user's course material."""
+
+    client = genai.Client(
+        api_key=st.secrets["GEMINI_API_KEY"]
+    )
+
+    prompt = f"""
+You are an AI study assistant helping a college student study Natural Language Processing.
+
+Create 10 flashcards from the provided course material.
+
+Requirements:
+- Use only information supported by the course material.
+- Do not invent facts or introduce outside information.
+- Focus on important concepts, definitions, relationships, examples, and technical details.
+- Include a mix of definition, conceptual, and application questions.
+- Each flashcard should test one clear concept.
+- Keep answers concise but sufficiently detailed.
+- Preserve technical terminology and mathematical notation.
+- Avoid duplicate or nearly identical questions.
+- Do not generate questions that cannot be answered from the provided material.
+- If there is insufficient material for 10 distinct flashcards, generate fewer rather than inventing content.
+
+Flashcard design:
+- Generate up to 10 flashcards, depending on the amount of meaningful information in the notes.
+- Each flashcard should test one specific learning objective.
+- Do not combine multiple unrelated questions into one card.
+- Avoid questions that substantially duplicate another card.
+- Include factual recall, conceptual understanding, comparisons, and application questions when the
+  source material supports them.
+- A comparison question may address two related concepts when understanding their relationship is the objective.
+- Prioritize important concepts over minor isolated facts.
+- Keep answers concise enough for flashcard-based studying.
+- Do not invent examples or applications unsupported by the notes.
+
+
+Return ONLY a valid JSON array with this structure:
+[
+    {{
+        "question": "What is tokenization?",
+        "answer": "The process of splitting text into tokens."
+    }},
+    {{
+        "question": "What is an n-gram?",
+        "answer": "A sequence of n consecutive tokens."
+    }}
+]
+Do not include Markdown formatting or explanatory text
+outside the JSON array.
+
+Course material:
+{course_material}
+"""
+
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json"
+        }
+    )
+
+    flashcards = json.loads(response.text)
+
+    if not isinstance(flashcards, list):
+        raise ValueError("Gemini did not return a list of flashcards.")
+
+    for card in flashcards:
+        if not isinstance(card, dict):
+            raise ValueError("Invalid flashcard format.")
+
+        if (
+            not isinstance(card.get("question"), str)
+            or not isinstance(card.get("answer"), str)
+            or not card["question"].strip()
+            or not card["answer"].strip()
+        ):
+            raise ValueError(
+                "Each flashcard must contain a non-empty question and answer."
+            )
+
+    return flashcards
