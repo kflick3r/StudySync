@@ -15,15 +15,35 @@ course_material = st.text_area(
     height=300
 )
 
-st.warning(
-    "**Before You Start Studying**\n\n"
-    "StudySync generates flashcards, multiple-choice questions, "
-    "and short-response exercises based on your submitted course materials. "
-    "These tools do not independently verify the accuracy of your notes.\n\n"
-    "**We recommend starting with the Review Guide** to identify "
-    "information that may be incorrect or need further verification "
-    "before using the other study tools."
+# Misinformation Warning
+st.markdown(
+    """
+    <div style="
+        background-color: #25213D;
+        border-left: 4px solid #A78BFA;
+        border-radius: 8px;
+        padding: 16px 20px;
+        color: #E9E4FF;
+        margin: 16px 0;
+        line-height: 1.6;
+    ">
+        <strong>Before You Start Studying</strong>
+        <p>
+            StudySync generates flashcards, multiple-choice questions,
+            and short-response exercises based on your submitted course
+            materials. These tools do not independently verify the
+            accuracy of your notes.
+        </p>
+        <p>
+            <strong>We recommend starting with the Review Guide</strong>
+            to identify information that may be incorrect or need
+            further verification before using the other study tools.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
+
 
 
 # Save the course material when the user is ready to study
