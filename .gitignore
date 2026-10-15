@@ -228,3 +228,6 @@ Thumbs.db
 
 # Private StudySync evaluation experiments
 /evaluation_results/
+
+# JetBrains IDE configuration
+.idea/
