@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.title("StudySync")
-st.write("AI-assisted NLP study companion")
+st.write("An AI-assisted NLP Study Companion")
 
 # Check whether the user already has course material saved.
 # If they do, use it as the starting text when editing notes.

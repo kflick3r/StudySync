@@ -1,5 +1,11 @@
 import streamlit as st
 
+st.set_page_config(
+    page_title="StudySync",
+    page_icon="📖",
+    layout="centered"
+)
+
 # st.Page() defines a page, 
 # while st.navigation() creates the navigation system
 
