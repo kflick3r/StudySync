@@ -74,7 +74,9 @@ Short Response will likely present the biggest challenge because evaluating open
 
 If time allows after completing the MVP and evaluations, I would like to explore adding **Ask StudySync**, a feature that allows students to ask follow-up questions and receive personalized explanations based on their course notes and performance on Multiple Choice and Short Response activities. This could help students identify gaps in their understanding and focus on concepts that need additional review.
 
-Overall, I am happy with my progress. StudySync has grown from an initial idea into a functioning application, and I have gained a better understanding of the challenges involved in building and evaluating AI-assisted software. For the remainder of the semester, I want to prioritize completing a functional, well-tested MVP rather than continuing to expand the project's scope.
+Another possibility for future development is expanding StudySync beyond NLP. While narrowing the scope to one subject has made the project more manageable, I would eventually like to explore how the application could support students across different courses and subjects.
+
+Overall, I am happy with my progress. StudySync has grown from an initial idea into a functioning application, and I have gained a better understanding of the challenges involved in building and evaluating AI-assisted software. For the remainder of the semester, I want to prioritize completing a functional, well-tested MVP.
 
 ---
 
