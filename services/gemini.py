@@ -215,3 +215,124 @@ Course material:
             )
 
     return flashcards
+
+
+# ---------------------------------------------------------
+# Gemini Prompt for Multiple Choice Questions
+# JSON construction approach developed with AI assistance
+# ---------------------------------------------------------
+
+
+def generate_multiple_choice(course_material):
+    """Generate multiple-choice questions from course material."""
+
+    client = genai.Client(
+        api_key=st.secrets["GEMINI_API_KEY"]
+    )
+
+    prompt = f"""
+You are an AI study assistant helping a college student study Natural Language Processing.
+
+Create up to 10 multiple-choice questions from the provided course material.
+
+Requirements:
+- Use only information supported by the provided course material.
+- Do not invent facts or introduce outside information.
+- Focus on important concepts, definitions, relationships, examples, and technical details.
+- Include a mix of factual recall, conceptual understanding, comparison, and application questions when supported by the notes.
+- Each question should test one clear learning objective.
+- Avoid duplicate or nearly identical questions.
+- If there is insufficient material for 10 distinct questions, generate fewer.
+
+Question design:
+- Each question must have exactly four answer options.
+- Exactly one option must be correct.
+- Incorrect options should be plausible but clearly incorrect based on the notes.
+- Avoid obviously silly or unrelated distractors.
+- Avoid trick questions and ambiguous wording.
+- Do not use "All of the above" or "None of the above."
+- Vary the position of the correct answer across questions.
+- Include a concise explanation of why the correct answer is correct.
+- Explanations must be supported by the provided notes.
+- Do not invent unsupported examples or applications.
+
+Return ONLY a valid JSON array with this structure:
+[
+    {{
+        "question": "What is tokenization?",
+        "options": [
+            "Splitting text into smaller units",
+            "Assigning sentiment scores",
+            "Translating between languages",
+            "Identifying document topics"
+        ],
+        "correct_answer": 0,
+        "explanation": "Tokenization divides text into smaller units called tokens."
+    }}
+]
+
+The correct_answer must be an integer from 0 to 3 representing
+the index of the correct option.
+
+Do not include Markdown formatting or explanatory text
+outside the JSON array.
+
+Course material:
+{course_material}
+"""
+
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json"
+        }
+    )
+
+    questions = json.loads(response.text)
+
+    if not isinstance(questions, list):
+        raise ValueError("Gemini did not return a list of questions.")
+
+    if not 1 <= len(questions) <= 10:
+        raise ValueError("Expected between 1 and 10 questions.")
+
+    for question in questions:
+        if not isinstance(question, dict):
+            raise ValueError("Invalid question format.")
+
+        if (
+            not isinstance(question.get("question"), str)
+            or not question["question"].strip()
+            or not isinstance(question.get("explanation"), str)
+            or not question["explanation"].strip()
+        ):
+            raise ValueError(
+                "Each question must have a question and explanation."
+            )
+
+        options = question.get("options")
+
+        if (
+            not isinstance(options, list)
+            or len(options) != 4
+            or any(
+                not isinstance(option, str) or not option.strip()
+                for option in options
+            )
+        ):
+            raise ValueError(
+                "Each question must contain four non-empty options."
+            )
+
+        if len(set(option.strip().casefold() for option in options)) != 4:
+            raise ValueError("Answer options must be distinct.")
+
+        correct_answer = question.get("correct_answer")
+
+        if type(correct_answer) is not int or not 0 <= correct_answer <= 3:
+            raise ValueError(
+                "The correct answer must be an integer from 0 to 3."
+            )
+
+    return questions
