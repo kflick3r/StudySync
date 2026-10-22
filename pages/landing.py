@@ -76,6 +76,15 @@ if st.button("Start Studying"):
             # Reset flashcard navigation
             st.session_state.current_flashcard_index = 0
             st.session_state.show_flashcard_answer = False
+                
+            # Clear previously generated multiple-choice questions
+            st.session_state.mc_questions = []
+
+            # Reset multiple-choice progress and results
+            st.session_state.mc_current_index = 0
+            st.session_state.mc_answers = {}
+            st.session_state.mc_selections = {}
+            st.session_state.mc_show_results = False
 
         # Navigate to the study tools selection page
         st.switch_page("pages/study_tools.py")

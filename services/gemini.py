@@ -251,7 +251,31 @@ Course material:
 # JSON construction approach developed with AI assistance
 # ---------------------------------------------------------
 
-# Helper function 
+# Helper functions
+
+# Validation check for LaTeX delimiters
+def has_valid_math_delimiters(text):
+    """Check that inline LaTeX math delimiters are balanced."""
+    if not isinstance(text, str):
+        return False
+
+    # Count only dollar signs that are not escaped
+    dollar_count = 0
+
+    for i, char in enumerate(text):
+        if char == "$":
+            backslashes = 0
+            j = i - 1
+
+            while j >= 0 and text[j] == "\\":
+                backslashes += 1
+                j -= 1
+
+            if backslashes % 2 == 0:
+                dollar_count += 1
+
+    return dollar_count % 2 == 0
+ 
 # Validation check for generated questions
 def is_valid_question(question):
     """Return True if a question has the structure the quiz page expects."""
@@ -292,7 +316,16 @@ def is_valid_question(question):
     # The correct answer must be an integer from 0 to 3. 
     # Checking type(...) is int also rejects True/False,
     # which Python would otherwise treat as the numbers 1 and 0
-    return type(correct_answer) is int and 0 <= correct_answer <= 3
+    if type(correct_answer) is not int or not 0 <= correct_answer <= 3:
+        return False
+
+    # Check LaTeX delimiters in the question, options, and explanation
+    texts = [text, *options, explanation]
+
+    if not all(has_valid_math_delimiters(t) for t in texts):
+        return False
+
+    return True
 
 
 def generate_multiple_choice(course_material):
@@ -302,43 +335,73 @@ def generate_multiple_choice(course_material):
         api_key=st.secrets["GEMINI_API_KEY"]
     )
 
-    prompt = f"""
-You are an AI study assistant helping a college student study Natural Language Processing.
+    prompt = rf"""
+You are creating multiple-choice study questions for a student using their own course notes.
 
-Create up to 10 multiple-choice questions from the provided course material.
+Generate up to 10 high-quality multiple-choice questions based on the provided course material.
 
-Requirements:
-- Use only information supported by the provided course material.
-- Do not invent facts or introduce outside information.
-- Focus on important concepts, definitions, relationships, examples, and technical details.
-- Include a mix of factual recall, conceptual understanding, comparison, and application questions when supported by the notes.
-- Each question should test one clear learning objective.
-- Avoid duplicate or nearly identical questions.
-- If there is insufficient material for 10 distinct questions, generate fewer.
+**Source accuracy and grounding**
+- Use the student's course material as the source for all questions, answers, and explanations.
+- Do not introduce unsupported facts, examples, or concepts.
+- Ensure that each question has exactly one clearly correct answer.
+- If the material does not support 10 distinct, meaningful questions, generate fewer.
+- Do not invent additional information to reach the maximum number of questions.
+- If the notes contain unclear or contradictory information, avoid generating questions that depend on it.
 
-Question design:
-- Each question must have exactly four answer options.
-- Exactly one option must be correct.
-- Incorrect options should be plausible but clearly incorrect based on the notes.
-- Avoid obviously silly or unrelated distractors.
-- Avoid trick questions and ambiguous wording.
-- Do not use "All of the above" or "None of the above."
-- Include a concise explanation of why the correct answer is correct.
-- Explanations must be supported by the provided notes.
-- Do not invent unsupported examples or applications.
+**Question quality and variety**
+- Cover different important concepts rather than repeatedly testing the same information.
+- Include a mixture of factual recall, conceptual understanding, and application questions when the notes support them.
+- Prefer questions that require understanding rather than simply recognizing a definition.
+- Include short calculations, scenarios, or interpretation questions when relevant examples or formulas are provided.
+- Do not force application questions when the material is too limited.
+
+**Answer options and distractors**
+- Provide exactly four answer options per question.
+- Include one correct answer and three plausible but incorrect distractors.
+- Distractors should reflect common misunderstandings, closely related concepts, or reasonable mistakes supported by the context of the notes.
+- Avoid obviously unrelated, nonsensical, or easily eliminated distractors.
+- Keep answer options reasonably similar in length, specificity, and grammatical structure.
+- Do not make the correct answer consistently longer or more detailed than the incorrect answers.
+- Avoid clues such as "always," "never," or unusually specific wording unless necessary.
+
+**Explanations**
+- Provide a brief but useful explanation for every correct answer.
+- Explain why the correct answer is correct rather than simply repeating its wording.
+- Include relevant reasoning, relationships, or supporting details from the notes.
+- When useful, briefly address a likely misconception.
+- Keep explanations grounded in the provided material.
+
+**Mathematical notation**
+- Preserve mathematical meaning and notation from the source material.
+- Use inline LaTeX for mathematical expressions when appropriate.
+- Wrap inline expressions in $...$.
+- Use valid LaTeX commands, such as \frac, \sum, and \mid.
+- Escape LaTeX backslashes correctly for JSON strings.
+- For example, the JSON representation of $\frac{{a}}{{b}}$
+  must contain a doubled backslash before frac.
+- Keep mathematical expressions readable in questions and answer options.
+- Do not include Markdown code fences.
+
+**Output requirements**
+- Return only valid JSON in the format required by the application.
+- Each question must contain `question`, `options`, `correct_answer`, and `explanation`.
+- `options` must contain exactly four strings.
+- `correct_answer` must be the zero-based index (0–3) of the correct option.
+- Do not include A, B, C, or D prefixes in the option strings.
+- Do not include additional commentary outside the JSON.
 
 Return ONLY a valid JSON array with this structure:
 [
     {{
-        "question": "What is tokenization?",
+        "question": "In a bigram language model, which context is used to predict the next word?",
         "options": [
-            "Splitting text into smaller units",
-            "Assigning sentiment scores",
-            "Translating between languages",
-            "Identifying document topics"
+            "Only the immediately preceding word",
+            "The two immediately preceding words",
+            "The entire preceding word sequence",
+            "Only the first word in the sequence"
         ],
         "correct_answer": 0,
-        "explanation": "Tokenization divides text into smaller units called tokens."
+        "explanation": "A bigram contains two words: the previous word and the word being predicted. Therefore, a bigram model uses one preceding word as context, rather than the full history."
     }}
 ]
 
