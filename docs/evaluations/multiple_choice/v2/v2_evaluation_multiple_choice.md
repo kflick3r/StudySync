@@ -1,22 +1,42 @@
-# StudySync: Multiple Choice V2
+# StudySync: Multiple Choice V2 — Implementation and Evaluation
 
 ## Overview
 
 The Multiple Choice feature uses Google's Gemini API to generate up to ten multiple-choice questions from student-provided NLP course materials.
 
-Each question includes four answer options, one correct answer, and an explanation. Students can check their answers individually or wait until the end of the quiz to view their results.
+Each question includes four answer options, one correct answer, and an explanation. Students can check their answers individually and review their results at the end of the quiz.
 
-The purpose of this evaluation is to determine whether the generated questions are accurate, grounded in the student's notes, and useful for studying. The results will help determine whether the current V2 prompt needs revisions.
+The V1 evaluation showed that Gemini could consistently generate accurate questions grounded in the original notes. However, several weaknesses appeared across all three tests, particularly with distractor quality, explanation depth, and question variety.
+
+For V2, I revised the prompt to address these issues while preserving the accuracy and grounding demonstrated in V1. I also added support for LaTeX mathematical notation and additional validation.
+
+The purpose of this evaluation is to determine whether these changes improved the quality of the generated questions.
+
+## Implementation Changes
+
+The V2 prompt includes more specific instructions for generating high-quality multiple-choice questions.
+
+The main changes include:
+
+- **Distractor Quality:** Encourage plausible incorrect answers based on related concepts or common misunderstandings rather than obviously unrelated options.
+- **Explanation Quality:** Require explanations to provide useful reasoning instead of simply repeating the correct answer.
+- **Question Variety:** Encourage a mixture of factual recall, conceptual understanding, and application questions when supported by the notes.
+- **Answer Balance:** Keep answer options reasonably similar in length, detail, and grammatical structure.
+- **Mathematical Notation:** Instruct Gemini to use LaTeX formatting for mathematical expressions.
+
+I also added a `has_valid_math_delimiters()` helper function to check whether inline mathematical delimiters are balanced. This validation runs alongside the existing checks for question structure, answer options, and correct answer indices.
+
+Additionally, I fixed an issue where previously generated multiple-choice questions remained available after the student submitted different course notes. The application now clears the previous quiz when the source material changes.
 
 ## Evaluation Methodology
 
-Three tests will be conducted using the V2 prompt without modifications.
+I conducted three tests using the V2 prompt without modifying it between generations.
 
-1. **Test 1: Baseline Generation** — Evaluate the quality of questions generated from a set of NLP course notes.
-2. **Test 2: Repeatability** — Generate another quiz using the same notes to examine consistency and variation.
-3. **Test 3: Limited Source Material** — Generate questions from a shorter set of notes to evaluate how Gemini handles limited information.
+1. **Test 1: Baseline Generation:** Evaluate questions generated from the same Logistic Regression notes used in V1.
+2. **Test 2: Repeatability:** Generate another quiz using the same Logistic Regression notes to examine consistency.
+3. **Test 3: Limited Source Material:** Generate questions from the same shortened N-Grams and Language Models notes used in V1.
 
-Each test will be evaluated using five criteria, scored from 1 to 5.
+Each test was evaluated using the same five criteria from V1, scored from 1 to 5.
 
 | Score | Description |
 |---|---|
@@ -38,15 +58,17 @@ Each test will be evaluated using five criteria, scored from 1 to 5.
 
 Each test receives a total score out of 25.
 
+LaTeX rendering was evaluated separately because it affects the usability of the generated questions rather than the accuracy of the underlying content.
+
 ---
 
 ## Test 1: Baseline Generation
 
-**Objective:** Evaluate the initial quality of multiple-choice questions generated using the V2 prompt.
+**Objective:** Evaluate the quality of questions generated using the revised V2 prompt.
 
 **Course Material Used:** Logistic Regression
 
-**Number of Questions Generated:** 10
+**Number of Questions Generated:** 9
 
 Generated questions, answers, and explanations can be found at: `/doc/evaluations/multiple_choice/v2/v2_test1.md`
 
@@ -54,156 +76,228 @@ Generated questions, answers, and explanations can be found at: `/doc/evaluation
 
 | Criterion | Score (1–5) | Notes |
 |---|---|---|
-| Accuracy | 5 / 5 | All ten questions had defensible correct answers. No incorrect answer keys were identified. |
-| Grounding | 5 / 5 | Questions, correct answers, and explanations were supported by the original Logistic Regression notes. |
-| Distractor Quality | 3 / 5 | Several incorrect options were too easy to eliminate, particularly in Questions 1, 4, 5, and 9. |
-| Explanation Quality | 3 / 5 | Explanations were accurate but often repeated the correct answer without providing additional context. |
-| Coverage & Variety | 4 / 5 | Questions covered several important concepts, but most focused on factual recall rather than application or problem-solving. |
-| **Total** | **20 / 25** | Good initial results, with room to improve distractors, explanations, and question variety. |
+| Accuracy | 5 / 5 | All nine questions had defensible correct answers. |
+| Grounding | 5 / 5 | Questions and explanations remained supported by the original notes. |
+| Distractor Quality | 3 / 5 | Several incorrect options were still relatively easy to eliminate. |
+| Explanation Quality | 4 / 5 | Some explanations included more useful reasoning and relationships than V1. |
+| Coverage & Variety | 3 / 5 | Questions included mathematical interpretation but still emphasized recall and repeated familiar concepts. |
+| **Total** | **20 / 25** | Some improvement in explanations, but no overall score increase from V1. |
 
 ### Question-Level Issues
 
-**Questions with incorrect or ambiguous answers:**  
-No clearly incorrect answer keys were identified. However, Question 2 could be more precise about the difference between the general probability range of 0 to 1 inclusive and the logistic sigmoid's output range of strictly between 0 and 1 for finite inputs.
+**Questions with incorrect or ambiguous answers:**
 
-**Questions containing unsupported information:**  
+No clearly incorrect answer keys were identified.
+
+**Questions containing unsupported information:**
+
 None identified.
 
-**Questions with weak distractors:**  
-Questions 1, 4, 5, and 9 contained distractors that were relatively easy to eliminate or did not require much conceptual understanding.
+**Questions with weak distractors:**
 
-**Questions with insufficient explanations:**  
-Questions 4, 6, 7, 8, and 9 contained explanations that largely repeated the correct answer without providing much additional context.
+Questions 1, 3, 5, and 7 contained incorrect options that were relatively easy to eliminate. For example, Question 5 included distractors suggesting that linear regression cannot calculate an intercept or can only handle negative weights.
+
+**Questions with insufficient explanations:**
+
+Questions 8 and 9 provided accurate explanations but mostly repeated the formulas used in the correct answers.
 
 ### Observations
 
 **What worked well?**
 
-Gemini successfully generated ten multiple-choice questions from the provided Logistic Regression notes. The questions were accurate and remained grounded in the source material. They covered several important concepts, including classification thresholds, decision boundaries, the sigmoid function, and feature weights. The quiz interface also appeared to function as expected, including answer selection, immediate feedback, and progress tracking.
+Gemini generated nine accurate questions covering important Logistic Regression concepts. The revised prompt produced some stronger explanations, particularly for classification thresholds, decision boundaries, and the relationship between the logit and sigmoid function.
+
+Question 4 was an improvement over V1 because it required students to connect the classification threshold of 0.5 with the logit value of zero, rather than simply identifying the probability threshold.
+
+Question 8 also included mathematical notation for computing the logit using multiple features.
+
+LaTeX rendering appeared to work correctly throughout this test.
 
 **What could be improved?**
 
-The biggest weaknesses were distractor quality and explanation depth. Some incorrect options were too obviously wrong, making the questions easier to answer through elimination. Several explanations also repeated the correct answer rather than explaining the underlying concept. Although the questions covered a reasonable range of topics, more application-based questions would make the quiz more useful for testing understanding.
+Distractor quality remained inconsistent. Several incorrect options were obviously wrong, making it possible to identify the correct answer without much understanding.
 
-**Overall Assessment:**
+Although the prompt encouraged application-based questions, Gemini did not generate any numerical calculations using the examples available in the notes.
 
-The initial results suggest that the V1 prompt provides a good foundation for generating multiple-choice study questions. The questions were accurate and grounded in the provided notes, but improvements to distractor quality, explanations, and question variety could make the tool more effective. Additional testing is needed to determine whether these weaknesses occur consistently before revising the prompt.
+The questions also overlapped substantially with the concepts tested in V1.
+
+### Overall Assessment
+
+V2 Test 1 received the same overall score as V1 Test 1, 20/25.
+
+The revised prompt showed some improvement in explanation quality and mathematical interpretation, but the distractors remained weak and question variety decreased slightly.
+
+The results suggest that the prompt revisions may help with certain aspects of question quality, but additional testing is needed to determine whether those improvements are consistent.
 
 ---
 
 ## Test 2: Repeatability
 
-**Objective:** Evaluate whether the V1 prompt produces consistently useful questions when given the same source material.
+**Objective:** Evaluate whether the V2 prompt produces consistently useful questions when given the same source material.
 
-**Course Material Used:** Same notes as Test 1
+**Course Material Used:** Same Logistic Regression notes as Test 1
 
-**Number of Questions Generated:** 10
+**Number of Questions Generated:** 8
+
+Generated questions, answers, and explanations can be found at: `/doc/evaluations/multiple_choice/v2/v2_test2.md`
 
 ### Evaluation Results
 
 | Criterion | Score (1–5) | Notes |
 |---|---|---|
-| Accuracy | 5 / 5 | All ten questions had defensible correct answers. No incorrect answer keys were identified. |
-| Grounding | 5 / 5 | Questions, correct answers, and explanations were supported by the original notes. |
-| Distractor Quality | 3 / 5 | Several incorrect options remained easy to eliminate or were unrelated to the concept being tested. |
-| Explanation Quality | 3 / 5 | Explanations were accurate but often repeated the correct answer without providing additional context. |
-| Coverage & Variety | 4 / 5 | Questions covered important concepts, but there was substantial overlap with Test 1 and little application-based reasoning. |
-| **Total** | **20 / 25** | Consistent with Test 1, including recurring weaknesses. |
+| Accuracy | 5 / 5 | All eight questions had defensible correct answers. |
+| Grounding | 5 / 5 | Questions and explanations remained grounded in the supplied notes. |
+| Distractor Quality | 3 / 5 | Several incorrect options were implausible or easy to eliminate. |
+| Explanation Quality | 4 / 5 | Some explanations included useful relationships, although others repeated the answer. |
+| Coverage & Variety | 2 / 5 | Most questions repeated concepts from Test 1 and relied on recall or basic understanding. |
+| **Total** | **19 / 25** | Accurate and grounded, but limited variety and repeated distractor weaknesses. |
 
 ### Comparison with Test 1
 
 **Were the generated questions substantially different?**
 
-No. Eight questions tested essentially the same concepts in both runs. The other two also remained within the same general areas of the logistic model.
+No. Most questions covered the same concepts as Test 1, including response types, classification thresholds, decision boundaries, feature weights, and the logit.
 
-The second run did not explore several concepts available in the notes, including calculating a decision boundary using \(x=-b/w\), the effect of changing the intercept, or applying the sigmoid formula.
+One new question asked how the logistic regression coefficients are determined, but the overall content remained very similar.
 
 **Was question quality consistent across both runs?**
 
-Yes. Both runs generated ten questions with defensible correct answers and no obvious unsupported content.
+Accuracy and grounding remained consistent. Both tests received 5/5 in those categories.
+
+Distractor quality also remained at 3/5, suggesting that the revised instructions did not consistently produce more plausible incorrect answers.
 
 **Did Gemini emphasize different concepts or question types?**
 
-Not substantially. Both runs emphasized factual recall and straightforward conceptual understanding. Neither included a numerical calculation, and both relied heavily on questions asking students to identify definitions or relationships.
+Not substantially. Test 2 included some mathematical notation and conceptual relationships, but no numerical calculation questions.
+
+Question 4 provided a useful explanation connecting the sigmoid, the logit, and the decision-boundary formula. However, most questions still required recognizing definitions or relationships rather than applying them.
 
 **Were any problems repeated?**
 
-Yes. The same two problems appeared in both runs: weak distractors and explanations that largely restated the correct answer. This is stronger evidence that those weaknesses are associated with the current prompt rather than an isolated generation.
+Yes. Weak distractors and limited question variety appeared again.
+
+Several questions also had correct answers that were noticeably more detailed than the incorrect options.
 
 ### Question-Level Issues
 
 **Questions with incorrect or ambiguous answers:**
+
 No clearly incorrect answer keys were identified.
 
 **Questions containing unsupported information:**
+
 None identified.
 
 **Questions with weak distractors:**
-Questions 1, 3, 5, 8, and 10 contained distractors that were relatively easy to eliminate or did not require much conceptual understanding.
+
+Questions 1, 5, 6, and 7 contained particularly weak distractors. For example, Question 6 suggested that logistic regression coefficients could be calculated by taking the square root of the input features.
 
 **Questions with insufficient explanations:**
-Questions 1, 4, 6, 9, and 10 contained explanations that largely repeated the correct answer or provided limited additional context.
+
+Question 6 simply stated that the coefficients must be learned from training data without providing additional reasoning. Other explanations were more informative, particularly Questions 3 and 4.
 
 ### Overall Assessment
 
-The second test confirmed that the V1 prompt produces consistently accurate and grounded multiple-choice questions. However, the repeated weaknesses in distractor quality, explanation depth, and question variety suggest that the prompt could be improved. Gemini generated almost the same set of concepts in both tests, with little emphasis on application or problem-solving. These findings support exploring prompt revisions after completing the limited-source-material test.
+Test 2 received a score of 19/25, slightly below the first V2 test.
+
+The results suggest that the revised prompt continues to produce accurate and grounded questions, but does not consistently improve distractors or question variety.
+
+The overlap between the two generations is particularly noticeable. Despite using the revised prompt, Gemini generated nearly the same types of questions without taking advantage of the numerical examples in the notes.
 
 ---
 
 ## Test 3: Limited Source Material
 
-**Objective:** Evaluate whether Gemini can generate meaningful questions from a smaller amount of course material without introducing unsupported information.
+**Objective:** Evaluate whether Gemini can generate meaningful questions from shorter notes without introducing unsupported information.
 
-**Course Material Used:** Short N-Gram notes
+**Course Material Used:** Short N-Grams and Language Models notes
 
-**Number of Questions Generated:** 9
+**Number of Questions Generated:** 6
+
+Generated questions, answers, and explanations can be found at: `/doc/evaluations/multiple_choice/v2/v2_test3.md`
 
 ### Evaluation Results
 
 | Criterion | Score (1–5) | Notes |
 |---|---|---|
-| Accuracy | 5 / 5 | All nine questions had defensible correct answers. No incorrect answer keys were identified. |
-| Grounding | 5 / 5 | Questions, correct answers, and explanations remained grounded in the supplied notes. |
-| Distractor Quality | 3 / 5 | Several incorrect options were implausible or unrelated to the concepts being tested. |
-| Explanation Quality | 3 / 5 | Explanations were accurate but frequently repeated the correct answer without additional context. |
-| Coverage & Variety | 4 / 5 | Questions covered the major concepts in the shortened notes, but relied primarily on factual recall and included some overlap. |
-| **Total** | **20 / 25** | Accurate and grounded, with recurring weaknesses in distractors, explanations, and variety. |
+| Accuracy | 5 / 5 | All six questions had defensible intended answers. |
+| Grounding | 5 / 5 | Questions and explanations remained supported by the supplied notes. |
+| Distractor Quality | 3 / 5 | Several incorrect options were implausible or unrelated to the concept being tested. |
+| Explanation Quality | 3 / 5 | Some explanations included useful examples, but others repeated the correct answer. |
+| Coverage & Variety | 2 / 5 | Only six questions were generated, with limited coverage and mostly recall-based questions. |
+| **Total** | **18 / 25** | Accurate and grounded, but limited variety and significant LaTeX rendering issues. |
 
 ### Limited-Material Observations
 
 **Did Gemini generate fewer than ten questions when appropriate?**
-Yes, Gemini only generated nine questions with the shorter notes. This is a positive result for the limited-material test. However, generating nine questions doesn't necessarily mean all nine are meaningfully distinct. Questions 7 and 8 overlap substantially.
+
+Yes. Gemini generated six questions from the shortened notes, compared with nine in V1.
+
+This shows that the prompt allows fewer questions to be generated, although it does not necessarily mean Gemini selected the ideal number of questions.
+
+The V2 generation covered fewer concepts than V1 despite using the same source material.
 
 **Did the questions remain grounded in the provided notes?**
-All nine answer keys are defensible based on the supplied notes. Gemini also avoided reproducing the apparent indexing error in the general N-gram formula.
+
+Yes. The questions covered concepts from the original notes, including the chain rule, long-context limitations, N-gram history lengths, sequence notation, bigram approximations, and BPE tokens.
+
+No clearly unsupported content was identified.
 
 **Were any questions repetitive or overly similar?**
-Most questions asked students to recognize a definition, identify a formula, or recall a fact. Gemini could have tested application by asking students to identify the appropriate history for a trigram model or apply the chain rule to a short sequence.
+
+There was some overlap between questions about N-gram history lengths and bigram approximations.
+
+Most questions focused on identifying definitions, formulas, or relationships. None required students to apply the chain rule to a short sequence or work through a probability calculation.
 
 **Did Gemini introduce unsupported examples, definitions, or explanations?**
-Explanations remained shallow. For example, Question 8 asks how many words a general N-gram model looks into the past. Its explanation simply states that an N-gram looks $N-1$ words into the past, without explaining that one position in the N-gram is occupied by the word being predicted.
+
+No clearly unsupported information was identified. However, several explanations remained shallow.
+
+For example, Question 6 explained that language models often operate over BPE tokens instead of raw words, but did not provide additional reasoning beyond the statement in the notes.
 
 ### Question-Level Issues
 
 **Questions with incorrect or ambiguous answers:**
-No clearly incorrect answer keys were identified.
+
+No clearly incorrect intended answer keys were identified. However, mathematical notation failed to render correctly in several questions, making some options difficult to interpret.
 
 **Questions containing unsupported information:**
+
 None identified.
 
 **Questions with weak distractors:**
-Questions 1, 2, 5, 7, and 8 contained incorrect options that were relatively easy to eliminate or did not require much conceptual understanding.
+
+Questions 2 and 6 contained distractors that were relatively easy to eliminate. Question 6, for example, included joint probability tables as an alternative to tokens.
 
 **Questions with insufficient explanations:**
-Questions 3, 4, 6, 7, 8, and 9 contained explanations that largely repeated the correct answer without providing additional reasoning.
+
+Questions 4, 5, and 6 contained explanations that largely repeated the correct answer or the notation being tested.
+
+Question 3 was stronger because it explained the general N-gram history length using bigram and trigram examples.
+
+### LaTeX Rendering Issues
+
+Unlike the Logistic Regression tests, several mathematical expressions in Test 3 appeared as raw LaTeX rather than formatted equations.
+
+This affected Questions 1, 2, 4, and 5.
+
+For example, some questions displayed literal commands such as `\mid` and underscore notation instead of properly formatted conditional probabilities and subscripts.
+
+The existing `has_valid_math_delimiters()` function checks whether dollar-sign delimiters are balanced. However, it does not detect mathematical expressions that contain LaTeX commands without delimiters.
+
+This means a question can pass validation even when its mathematical notation does not render correctly.
+
+The issue is especially important for questions involving probability formulas, where students need to distinguish between similar expressions.
 
 ### Overall Assessment
 
-The limited-material test showed that the V1 prompt can generate fewer than ten questions while maintaining accuracy and grounding. All nine questions were supported by the provided notes, and no incorrect answer keys were identified.
+The limited-material test received a score of 18/25, the lowest of the three V2 tests.
 
-However, the same weaknesses observed in Tests 1 and 2 appeared again. Several distractors were too easy to eliminate, explanations often repeated the correct answer, and most questions emphasized factual recall rather than application. There was also some overlap between questions testing similar concepts.
+The questions remained accurate and grounded, but distractors and explanations showed limited improvement. Coverage also decreased compared with V1.
 
-These results suggest that the V1 prompt provides a reliable foundation but could benefit from revisions that encourage stronger distractors, more informative explanations, and greater question variety.
+The LaTeX rendering problems revealed an additional weakness that was not apparent during the Logistic Regression tests.
+
+These findings suggest that future improvements should address both prompt quality and mathematical formatting reliability.
 
 ---
 
@@ -211,92 +305,142 @@ These results suggest that the V1 prompt provides a reliable foundation but coul
 
 | Evaluation | Accuracy | Grounding | Distractors | Explanations | Coverage | Total |
 |---|---|---|---|---|---|---|
-| Test 1: Baseline | 5 | 5 | 3 | 3 | 4 | 20 / 25 |
-| Test 2: Repeatability | 5 | 5 | 3 | 3 | 4 | 20 / 25 |
-| Test 3: Limited Material | 5 | 5 | 3 | 3 | 4 | 20 / 25 |
-| **Average** | 5 | 5 | 3 | 3 | 4 | 20 / 25 |
+| Test 1: Baseline | 5 | 5 | 3 | 4 | 3 | 20 / 25 |
+| Test 2: Repeatability | 5 | 5 | 3 | 4 | 2 | 19 / 25 |
+| Test 3: Limited Material | 5 | 5 | 3 | 3 | 2 | 18 / 25 |
+| **Average** | **5** | **5** | **3** | **3.67** | **2.33** | **19 / 25** |
+
+Across the three tests, Gemini generated 23 multiple-choice questions.
+
+### Comparison with V1
+
+| Evaluation | V1 Score | V2 Score | Difference |
+|---|---|---|---|
+| Test 1: Baseline | 20 / 25 | 20 / 25 | 0 |
+| Test 2: Repeatability | 20 / 25 | 19 / 25 | -1 |
+| Test 3: Limited Material | 20 / 25 | 18 / 25 | -2 |
+| **Average** | **20 / 25** | **19 / 25** | **-1** |
 
 ### Key Findings
 
-**Strengths of the V1 Prompt:**
+**Strengths of the V2 Prompt:**
 
-Across all three tests, Gemini generated 29 multiple-choice questions with no clearly incorrect answer keys or unsupported information identified. The questions remained grounded in the original course notes and covered the main concepts in each topic.
+Across all three tests, Gemini continued to generate accurate questions grounded in the original course notes. No clearly incorrect answer keys or unsupported information were identified.
 
-The results were also consistent across multiple generations. All three tests received an overall score of 20/25. In the limited-material test, Gemini generated nine questions instead of the maximum of ten, suggesting that the prompt can adjust the number of questions based on the available material.
+Some explanations were more informative than those generated in V1, particularly when explaining relationships between classification thresholds, logits, and decision boundaries.
+
+V2 also successfully generated and displayed LaTeX notation in the Logistic Regression tests.
 
 **Weaknesses or Recurring Problems:**
 
-The most consistent weaknesses were distractor quality and explanation depth. Several incorrect answer options were obviously wrong or unrelated to the question, making it possible to identify the correct answer through elimination rather than understanding the concept.
+The revised prompt did not consistently improve distractor quality. Several incorrect options were still obviously wrong or unrelated to the concept being tested.
 
-Some questions also tested very similar information. In Test 2, Gemini generated almost the same set of questions as Test 1, despite using a new generation. Test 3 also contained some overlap between questions about bigram and general N-gram history lengths.
+Question variety also decreased. Gemini generated fewer questions in each V2 test than in the corresponding V1 test, and the questions continued to emphasize factual recall and basic conceptual understanding.
+
+The limited-material test also revealed inconsistent LaTeX formatting.
 
 **Answer Length and Distractor Balance:**
 
-In several questions, the correct answer was noticeably longer or more specific than the incorrect options. This was particularly apparent in Test 3, where some correct answers included detailed definitions while the distractors were shorter or less relevant.
+Some correct answers remained noticeably longer or more specific than the distractors.
 
-Although this was not consistent across every question, it could make some answers easier to identify without fully understanding the material.
+This was particularly apparent in Test 2, where several correct options contained more detailed mathematical or conceptual information.
+
+Although the prompt specifically requested balanced answer options, the results suggest that this instruction was not consistently followed.
 
 **Question Difficulty and Variety:**
 
-Most questions focused on factual recall or basic conceptual understanding. There were some useful conceptual questions, particularly those involving classification thresholds and the Markov assumption, but very few required students to apply information or solve a problem.
+Most questions focused on recalling definitions, identifying formulas, or recognizing relationships.
 
-For example, the Logistic Regression notes included formulas and numerical examples for calculating decision boundaries, but neither generation included a calculation-based question.
+V2 included some stronger mathematical interpretation questions, particularly those involving the logit and decision boundary. However, it still did not generate numerical calculations using the worked examples in the Logistic Regression notes.
+
+The repeated emphasis on similar concepts suggests that simply asking for a mixture of question types may not be enough to encourage greater variety.
 
 **Explanation Quality:**
 
-The explanations were generally accurate and grounded in the original notes, but many simply repeated the correct answer. They confirmed which option was correct without always explaining why it was correct or helping the student understand the underlying concept.
+Explanation quality improved slightly in the first two tests.
 
-More informative explanations could make the feature more useful for studying, especially when students answer incorrectly.
+Some explanations included additional reasoning or connected related concepts. However, others continued to repeat the correct answer without providing much additional context.
+
+The improvement was not consistent across all three tests.
+
+**LaTeX Reliability:**
+
+LaTeX rendering worked correctly in the Logistic Regression tests but failed for several expressions in the N-Grams test.
+
+The current validation checks balanced delimiters but does not guarantee that mathematical notation is properly formatted or rendered.
+
+This will need additional investigation before the feature can reliably support mathematical course materials.
 
 ---
 
 ## Prompt Evaluation and Next Steps
 
-### Does the V1 Prompt Need Revision?
+### Does the V2 Prompt Need Revision?
 
-**Decision:** Revise Prompt
+**Decision:** Investigate LaTeX formatting and revise the prompt.
 
 **Reasoning:**
 
-The V1 prompt consistently generated accurate and grounded questions, so the basic approach appears to be working well. However, the same weaknesses appeared across all three tests, particularly with distractors, explanations, and question variety.
+The V2 prompt preserved the accuracy and grounding demonstrated in V1, which is encouraging. However, it did not produce a consistent improvement in overall question quality.
 
-Rather than rewriting the entire prompt, I want to make targeted changes that address these issues while preserving the accuracy and grounding demonstrated in V1.
+The average evaluation score decreased from 20/25 in V1 to 19/25 in V2.
 
-### Proposed Prompt Changes
+Distractor quality remained unchanged, explanations improved slightly, and question variety decreased.
+
+The LaTeX rendering problems in Test 3 also showed that the new mathematical formatting instructions and validation are not yet reliable.
+
+Because the same notes and evaluation rubric were used for both versions, the results provide a useful comparison. However, the evaluation is still limited to three generations per version, so the differences should not be treated as definitive evidence that V2 performs worse in general.
+
+### Proposed Changes
 
 | Identified Issue | Proposed Change | Supporting Evidence |
 |---|---|---|
-| Weak distractors | Instruct Gemini to generate plausible incorrect answers that reflect common misconceptions or closely related concepts, rather than obviously unrelated options. | All three tests contained distractors that were easy to eliminate. |
-| Shallow explanations | Require explanations to briefly explain the reasoning behind the correct answer instead of simply repeating it. | Questions 4, 6, and 8 in Test 1 and several questions in Test 3 contained repetitive explanations. |
-| Limited question variety | Encourage a mix of recall, conceptual understanding, and application questions when supported by the source material. Avoid generating multiple questions that test essentially the same concept. | Tests 1 and 2 contained no numerical application questions, and Test 3 included overlapping questions about N-gram history lengths. |
-| Answer-length imbalance | Encourage answer options to have similar levels of detail and length without sacrificing accuracy or clarity. | Several questions, particularly in Test 3, had correct answers that were noticeably longer or more specific than the distractors. |
+| Weak distractors | Explore more specific instructions for generating closely related incorrect answers and common misconceptions. | All three V2 tests scored 3/5 for distractor quality. |
+| Limited question variety | Consider a more structured approach to selecting distinct concepts and question types before generating questions. | V2 Tests 2 and 3 scored 2/5 for coverage and variety. |
+| Shallow explanations | Continue encouraging explanations that include reasoning or clarify a misconception rather than repeating the answer. | Several explanations in Tests 2 and 3 remained repetitive. |
+| Inconsistent LaTeX formatting | Investigate generated strings and improve mathematical notation handling and validation. | Test 3 displayed raw LaTeX commands in multiple questions. |
+| Answer-length imbalance | Improve instructions for keeping correct and incorrect answers similar in length and specificity. | Some correct answers remained more detailed than distractors. |
 
 ### Next Steps
 
-The next step is to develop a V2 prompt that incorporates these targeted improvements.
+Before developing V3, I want to investigate the LaTeX rendering issue.
 
-I plan to keep the existing question generation and validation functionality while revising the prompt instructions for distractor quality, explanations, and question variety.
+The next step is to inspect the raw strings returned by Gemini to determine whether mathematical expressions contain the expected delimiters and properly escaped backslashes.
 
-Once V2 is implemented, I will test it using the same Logistic Regression and N-Grams notes from V1. Using the same source material and evaluation rubric will allow me to compare the results and determine whether the prompt changes improve question quality without reducing accuracy or grounding.
+Once the formatting issue is resolved, I can decide whether to make additional prompt revisions.
+
+For V3, I would like to focus on improving distractor quality and question variety without sacrificing accuracy or grounding.
+
+Any revised prompt should be tested using the same source notes and evaluation rubric so the results can be compared with V1 and V2.
 
 ---
 
 ## Final Reflection
 
-**What did I learn from implementing and evaluating Multiple Choice V1?**
+**What did I learn from implementing and evaluating Multiple Choice V2?**
 
-One of my biggest takeaways was that generating technically correct multiple-choice questions is only part of building a useful study tool. Gemini consistently produced accurate questions, but that did not necessarily mean they were challenging or effective for studying. The quality of the incorrect answer options and explanations matters just as much as getting the correct answer right.
+One of my biggest takeaways was that adding more detailed prompt instructions does not necessarily produce better results.
 
-I also found that evaluating multiple generations was useful for identifying patterns. Some issues might have seemed minor in a single quiz, but seeing the same weaknesses across three tests helped me identify where the prompt needs improvement.
+I expected the revised prompt to improve distractors, explanations, and question variety. Although some explanations improved, the overall scores did not increase, and the generated questions became less varied.
+
+This reinforced the importance of evaluating AI-generated content rather than assuming that a more specific prompt will automatically perform better.
+
+I also learned that formatting is an important part of evaluating an AI-assisted study tool. Even when the mathematical content is correct, incorrectly rendered notation can make a question confusing or difficult to answer.
 
 **What challenges did I encounter?**
 
-One challenge was balancing question difficulty with accuracy and grounding. I want Gemini to generate questions that require students to think, but I also want to make sure it doesn't introduce information that isn't supported by their notes.
+The biggest challenge was improving question difficulty without introducing unsupported information. Gemini continued to generate accurate questions, but many distractors were too obvious, and most questions relied on factual recall.
 
-Another challenge was evaluating distractor quality. An incorrect answer can be factually wrong but still be a poor distractor if it is too obvious. I also found that explanations need more attention because simply repeating the correct answer doesn't provide much additional value to the student.
+Another challenge was implementing reliable LaTeX rendering. The notation worked in the Logistic Regression tests, but several expressions failed to render in the N-Grams test. This revealed a limitation in my initial validation approach.
+
+I also encountered a session-state issue where changing the submitted course notes did not clear the previously generated quiz. Fixing this helped ensure that students would not accidentally study questions generated from outdated material.
 
 **What would I improve in future versions?**
 
-For V2, I want to focus on making the generated questions more useful for active recall and understanding. This includes improving distractors, generating more application-based questions when the material supports them, and providing explanations that help students understand the reasoning behind an answer.
+For future versions, I want to focus on generating more meaningful questions rather than simply adding more instructions to the prompt.
 
-I also want to continue evaluating generated content against the original notes. The goal is not just to generate questions that look correct, but to create a study tool that helps students identify what they understand and where they might need more review.
+I would like Gemini to produce stronger distractors, cover a wider range of concepts, and include more application-based questions when the source material supports them.
+
+I also want to improve mathematical formatting validation so that students can reliably study topics involving formulas and notation.
+
+Overall, V2 helped me better understand the difference between improving an AI prompt and improving the complete application. Even when the generated content is accurate, question design, formatting, and application behavior all affect how useful the tool is for studying.
