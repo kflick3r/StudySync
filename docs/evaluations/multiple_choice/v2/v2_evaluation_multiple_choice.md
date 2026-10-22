@@ -403,12 +403,6 @@ Because the same notes and evaluation rubric were used for both versions, the re
 
 ### Next Steps
 
-Before developing V3, I want to investigate the LaTeX rendering issue.
-
-The next step is to inspect the raw strings returned by Gemini to determine whether mathematical expressions contain the expected delimiters and properly escaped backslashes.
-
-Once the formatting issue is resolved, I can decide whether to make additional prompt revisions.
-
 For V3, I would like to focus on improving distractor quality and question variety without sacrificing accuracy or grounding.
 
 Any revised prompt should be tested using the same source notes and evaluation rubric so the results can be compared with V1 and V2.
