@@ -7,11 +7,6 @@ track_page_navigation("multiple_choice")
 
 
 # ------------------------------------
-# Multiple Choice Button Styling
-# ------------------------------------
-
-
-# ------------------------------------
 # Multiple Choice Answer Styling
 # ------------------------------------
 
@@ -85,7 +80,6 @@ st.markdown(
 )
 
 
-
 # ------------------------------------
 # Helper Functions
 # ------------------------------------
@@ -118,6 +112,45 @@ def submit_quiz():
                 st.session_state.mc_answers[i] = selected
 
     st.session_state.mc_show_results = True
+
+def has_progress():
+    """True if the user has selected or checked any answers."""
+    return bool(
+        st.session_state.mc_answers or st.session_state.mc_selections
+    )
+
+
+def generate_questions():
+    """Generate a fresh set of questions and reset progress."""
+    with st.spinner("Generating questions..."):
+        try:
+            st.session_state.mc_questions = generate_multiple_choice(
+                st.session_state.course_material
+            )
+            reset_quiz_progress()
+            st.success("Questions generated successfully!")
+
+        except Exception as error:
+            st.error(f"Error generating questions: {error}")
+
+
+@st.dialog("Generate new questions?")
+def confirm_regenerate():
+    st.write(
+        "This will replace your current questions and reset "
+        "your answers."
+    )
+
+    cancel_col, confirm_col = st.columns(2)
+
+    with cancel_col:
+        if st.button("Cancel", width="stretch"):
+            st.rerun()
+
+    with confirm_col:
+        if st.button("Generate", type="primary", width="stretch"):
+            st.session_state.mc_regenerate = True
+            st.rerun()
 
 
 # ------------------------------------
@@ -159,26 +192,23 @@ if not st.session_state.get("course_material"):
     )
 
 else:
+    
 
-    if st.button("Generate Questions"):
+    label = (
+        "Regenerate Questions"
+        if st.session_state.mc_questions
+        else "Generate Questions"
+    )
 
-        with st.spinner("Generating questions..."):
+    if st.button(label):
+        if has_progress():
+            confirm_regenerate()
+        else:
+            generate_questions()
 
-            try:
-                generated_questions = generate_multiple_choice(
-                    st.session_state.course_material
-                )
-
-                if not generated_questions:
-                    raise ValueError("No questions were generated.")
-
-                st.session_state.mc_questions = generated_questions
-                reset_quiz_progress()
-
-                st.success("Questions generated successfully!")
-
-            except Exception as error:
-                st.error(f"Error generating questions: {error}")
+    # Set by the confirmation dialog
+    if st.session_state.pop("mc_regenerate", False):
+        generate_questions()
 
     if st.session_state.mc_questions:
 

@@ -5,6 +5,7 @@ import streamlit as st
 from google import genai
 
 import json
+import random
 
 # ------------------------
 # URL generation
@@ -222,6 +223,49 @@ Course material:
 # JSON construction approach developed with AI assistance
 # ---------------------------------------------------------
 
+# Helper function 
+# Validation check for generated questions
+def is_valid_question(question):
+    """Return True if a question has the structure the quiz page expects."""
+
+    # Each question must be a dictionary (a JSON object)
+    if not isinstance(question, dict):
+        return False
+
+    text = question.get("question")
+    explanation = question.get("explanation")
+
+    # The question and explanation must be non-empty strings
+    if (
+        not isinstance(text, str) or not text.strip()
+        or not isinstance(explanation, str) or not explanation.strip()
+    ):
+        return False
+
+    options = question.get("options")
+
+    # There must be exactly four options, and each must be a
+    # non-empty string
+    if (
+        not isinstance(options, list)
+        or len(options) != 4
+        or any(not isinstance(o, str) or not o.strip() for o in options)
+    ):
+        return False
+
+    # All four options must be different from each other, ignoring
+    # extra spaces and capitalization. A set removes duplicates, so if
+    # it has fewer than 4 items, at least two options matched.
+    if len({o.strip().casefold() for o in options}) != 4:
+        return False
+
+    correct_answer = question.get("correct_answer")
+
+    # The correct answer must be an integer from 0 to 3. 
+    # Checking type(...) is int also rejects True/False,
+    # which Python would otherwise treat as the numbers 1 and 0
+    return type(correct_answer) is int and 0 <= correct_answer <= 3
+
 
 def generate_multiple_choice(course_material):
     """Generate multiple-choice questions from course material."""
@@ -251,7 +295,6 @@ Question design:
 - Avoid obviously silly or unrelated distractors.
 - Avoid trick questions and ambiguous wording.
 - Do not use "All of the above" or "None of the above."
-- Vary the position of the correct answer across questions.
 - Include a concise explanation of why the correct answer is correct.
 - Explanations must be supported by the provided notes.
 - Do not invent unsupported examples or applications.
@@ -289,50 +332,29 @@ Course material:
         }
     )
 
-    questions = json.loads(response.text)
+    # Keep only the questions that pass validation, and cap the list
+    # at 10. One bad question no longer discards the whole batch.
+    questions = [q for q in questions if is_valid_question(q)][:10]
 
-    if not isinstance(questions, list):
-        raise ValueError("Gemini did not return a list of questions.")
+    # Only fail if nothing usable is left
+    if not questions:
+        raise ValueError(
+            "Gemini didn't return any valid questions. Please try again."
+        )
 
-    if not 1 <= len(questions) <= 10:
-        raise ValueError("Expected between 1 and 10 questions.")
-
+    # Shuffle the answer options so the correct answer isn't always
+    # in the same position.
     for question in questions:
-        if not isinstance(question, dict):
-            raise ValueError("Invalid question format.")
 
-        if (
-            not isinstance(question.get("question"), str)
-            or not question["question"].strip()
-            or not isinstance(question.get("explanation"), str)
-            or not question["explanation"].strip()
-        ):
-            raise ValueError(
-                "Each question must have a question and explanation."
-            )
+        # Remember the correct answer's text, because shuffling will
+        # change which position it ends up in
+        correct_text = question["options"][question["correct_answer"]]
 
-        options = question.get("options")
+        random.shuffle(question["options"])
 
-        if (
-            not isinstance(options, list)
-            or len(options) != 4
-            or any(
-                not isinstance(option, str) or not option.strip()
-                for option in options
-            )
-        ):
-            raise ValueError(
-                "Each question must contain four non-empty options."
-            )
-
-        if len(set(option.strip().casefold() for option in options)) != 4:
-            raise ValueError("Answer options must be distinct.")
-
-        correct_answer = question.get("correct_answer")
-
-        if type(correct_answer) is not int or not 0 <= correct_answer <= 3:
-            raise ValueError(
-                "The correct answer must be an integer from 0 to 3."
-            )
+        # Find where the correct answer landed and update the index.
+        # This is safe because validation guarantees the options are
+        # all different.
+        question["correct_answer"] = question["options"].index(correct_text)
 
     return questions
