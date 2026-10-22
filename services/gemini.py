@@ -128,6 +128,14 @@ Course material:
         contents=prompt
     )
 
+    # Gemini can return nothing (for example, if a safety filter blocks
+    # the response). In that case response.text is None, so stop here
+    # with a clear message instead of failing later with a confusing one.
+    if not response.text or not response.text.strip():
+        raise ValueError(
+            "Gemini returned an empty response. Please try again."
+        )
+    
     review_guide = response.text
 
     return add_verification_links(review_guide)
