@@ -352,38 +352,45 @@ SOURCE ACCURACY
 - Generate fewer than 10 questions if the notes do not support
   10 distinct, meaningful questions.
 
-QUESTION SELECTION AND VARIETY
-Before writing the questions, internally identify the important
-concepts, relationships, examples, and formulas in the notes.
+QUESTION PLANNING AND COVERAGE
+Before writing questions, internally identify the distinct learning
+objectives supported by the notes.
 
-Then select distinct learning objectives for the questions.
+Select up to 10 objectives that provide broad coverage of the most
+important concepts, relationships, examples, and formulas.
 
-- Do not repeatedly test the same concept using slightly
-  different wording.
-- Prioritize coverage of different important concepts.
+- Generate no more than one question per learning objective.
+- Treat equivalent definitions, formulas, and notations as one
+  objective unless they require meaningfully different reasoning.
+- Prioritize covering different important concepts over generating
+  multiple variations of the same question.
 - Include factual recall, conceptual understanding, comparison,
   interpretation, and application when supported by the notes.
+- When both a recall question and an application question could
+  test the same objective, prefer the application question if
+  the notes provide enough information.
 - When the notes contain worked numerical examples or formulas,
-  include at least one question that requires applying them,
-  provided a clear answer can be determined.
-- Prefer questions that require students to reason rather than
-  simply recognize a definition.
+  include at least one question requiring application, provided
+  a clear answer can be determined.
 - Do not invent scenarios or numerical information that cannot
   be justified from the notes.
 
 DISTRACTOR DESIGN
-For each question, create three incorrect answer options that
-a student with an incomplete understanding might reasonably select.
+For each question, internally identify likely misunderstandings
+or reasoning mistakes a student might make.
 
-- Use closely related concepts, common confusions, or reasonable
-  mistakes based on the notes.
-- For mathematical questions, use plausible calculation errors,
-  incorrect substitutions, or confused formulas when appropriate.
-- Avoid nonsensical, unrelated, or obviously impossible answers.
+Use these to create three plausible but incorrect answer options.
+
+- Prefer distractors based on confused concepts, incorrect
+  relationships, calculation mistakes, or misapplied formulas.
+- For mathematical questions, consider realistic errors such as
+  incorrect signs, substitutions, or rearrangements.
+- Avoid unrelated concepts, nonsensical claims, and answers that
+  can be eliminated without understanding the material.
 - Make all four options similar in length, detail, and structure.
 - Do not make the correct answer stand out through wording,
   specificity, or formatting.
-- Ensure the distractors are clearly incorrect based on the notes.
+- Ensure every distractor is clearly incorrect based on the notes.
 - Do not use "All of the above" or "None of the above."
 
 EXPLANATIONS
@@ -408,8 +415,11 @@ MATHEMATICAL NOTATION
 FINAL QUALITY CHECK
 Before returning the questions, internally verify that:
 - Each question tests a distinct learning objective.
+- Important concepts are not unnecessarily omitted in favor
+  of repeated questions about the same concept.
 - Exactly one answer is correct.
-- All three distractors are plausible but incorrect.
+- All three distractors represent plausible misunderstandings
+  or reasoning errors.
 - The correct answer is not identifiable from answer length alone.
 - The explanation provides useful reasoning.
 - All content is supported by the notes.
@@ -427,24 +437,29 @@ Each object must contain:
 Do not prefix answer options with A, B, C, or D.
 Do not include commentary or Markdown outside the JSON.
 
+The following example illustrates the required JSON structure
+and explanation style. Do not use its subject matter unless
+it is supported by the student's notes.
+
 Example:
 [
     {{
-        "question": "In a bigram language model, which context is used to predict the next word?",
+        "question": "If a binary classifier lowers its decision threshold from 0.5 to 0.2, what happens to its positive predictions?",
         "options": [
-            "Only the immediately preceding word",
-            "The two immediately preceding words",
-            "The entire preceding word sequence",
-            "Only the first word in the sequence"
+            "More observations may be classified as positive",
+            "Fewer observations may be classified as positive",
+            "The predicted probabilities automatically increase",
+            "The model's learned coefficients are recalculated"
         ],
         "correct_answer": 0,
-        "explanation": "A bigram uses one preceding word as context. A trigram uses two preceding words, while the full sequence is not used in the bigram approximation."
+        "explanation": "Lowering the threshold means an observation needs a smaller predicted probability to be classified as positive. This can increase the number of positive predictions without changing the model's predicted probabilities."
     }}
 ]
 
 Course material:
 {course_material}
 """
+
 
     response = client.models.generate_content(
         model=GEMINI_MODEL,
