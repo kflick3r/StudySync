@@ -1,10 +1,50 @@
 import streamlit as st
 import random
-from components import show_study_navigation
+from components import track_page_navigation, show_study_navigation
 from services.gemini import generate_flashcards
 
-from components import track_page_navigation
 track_page_navigation("flashcards")
+
+
+# ------------------------------------
+# Helper Functions
+# ------------------------------------
+
+def create_flashcards():
+    """Generate a new deck and return to the first card."""
+    with st.spinner("Generating flashcards..."):
+        try:
+            st.session_state.flashcards = generate_flashcards(
+                st.session_state.course_material
+            )
+
+            # Start at the first card with the answer hidden
+            st.session_state.current_flashcard_index = 0
+            st.session_state.show_flashcard_answer = False
+
+            st.success("Flashcards generated successfully!")
+
+        except Exception as error:
+            st.error(f"Error generating flashcards: {error}")
+
+
+@st.dialog("Generate new flashcards?")
+def confirm_regenerate():
+    st.write(
+        "This will replace your current flashcards with a new set."
+    )
+
+    cancel_col, confirm_col = st.columns(2)
+
+    with cancel_col:
+        if st.button("Cancel", width="stretch"):
+            st.rerun()
+
+    with confirm_col:
+        if st.button("Generate", type="primary", width="stretch"):
+            st.session_state.flashcards_regenerate = True
+            st.rerun()
+
 
 # ------------------------------------
 # Title and Generate Flashcard Button
@@ -34,26 +74,23 @@ else:
     if "show_flashcard_answer" not in st.session_state:
         st.session_state.show_flashcard_answer = False
 
-    # Generate flashcards from the saved course material
-    if st.button("Generate Flashcards"):
-        with st.spinner("Generating flashcards..."):
-            try:
-                generated_flashcards = generate_flashcards(
-                    st.session_state.course_material
-                )
+    # Change the label once a deck exists
+    label = (
+        "Regenerate Flashcards"
+        if st.session_state.flashcards
+        else "Generate Flashcards"
+    )
 
-                st.session_state.flashcards = generated_flashcards
+    if st.button(label):
+        # Ask before replacing an existing deck
+        if st.session_state.flashcards:
+            confirm_regenerate()
+        else:
+            create_flashcards()
 
-                # Start at the first card with the answer hidden
-                st.session_state.current_flashcard_index = 0
-                st.session_state.show_flashcard_answer = False
-
-                st.success("Flashcards generated successfully!")
-
-            except Exception as error:
-                st.error(
-                    f"Error generating flashcards: {error}"
-                )
+    # Set by the confirmation dialog
+    if st.session_state.pop("flashcards_regenerate", False):
+        create_flashcards()
 
 
 # ----------------------
@@ -150,14 +187,14 @@ else:
 
                 # If the answer is visible, show the Hide Answer button
                 if st.session_state.show_flashcard_answer:
-                    if st.button("Hide Answer", use_container_width=True):
+                    if st.button("Hide Answer", width="stretch"):
                         st.session_state.show_flashcard_answer = False
                         # Rerun the page to hide the answer
                         st.rerun()
 
                 # Otherwise, show the Reveal Answer button
                 else:
-                    if st.button("Reveal Answer", use_container_width=True):
+                    if st.button("Reveal Answer", width="stretch"):
                         st.session_state.show_flashcard_answer = True
                         # Rerun the page to show the answer
                         st.rerun()
@@ -176,7 +213,7 @@ else:
                 "Previous",
                 # Disable the "previous" button on the first question
                 disabled=(current_flashcard_index == 0),
-                use_container_width=True
+                width="stretch"
             ):
                 st.session_state.current_flashcard_index -= 1
                 st.session_state.show_flashcard_answer = False
@@ -189,7 +226,7 @@ else:
                 disabled=(
                     current_flashcard_index == total_flashcards - 1
                 ),
-                use_container_width=True
+                width="stretch"
             ):
                 st.session_state.current_flashcard_index += 1
                 st.session_state.show_flashcard_answer = False

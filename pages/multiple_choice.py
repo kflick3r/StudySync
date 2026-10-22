@@ -192,7 +192,7 @@ if not st.session_state.get("course_material"):
     )
 
 else:
-    
+
 
     label = (
         "Regenerate Questions"
@@ -278,7 +278,7 @@ else:
             if st.button(
                 "Try Again",
                 key="mc_retry_top",
-                use_container_width=True
+                width="stretch"
             ):
                 reset_quiz_progress()
                 st.rerun()
@@ -324,7 +324,7 @@ else:
             if st.button(
                 "Try Again",
                 key="mc_retry_bottom",
-                use_container_width=True
+                width="stretch"
             ):
 
                 reset_quiz_progress()
@@ -409,7 +409,7 @@ else:
                             st.button(
                                 label,
                                 key=f"mc_option_{current_index}_{option_index}",
-                                use_container_width=True,
+                                width="stretch",
                                 type="primary" if is_selected else "secondary",
                                 disabled=checked,
                                 on_click=choose_answer,
@@ -426,7 +426,7 @@ else:
 
                     if st.button(
                         "Check Answer",
-                        use_container_width=True,
+                        width="stretch",
                         disabled=selected is None
                     ):
 
@@ -473,7 +473,7 @@ else:
                 if st.button(
                     "Previous",
                     disabled=current_index == 0,
-                    use_container_width=True
+                    width="stretch"
                 ):
 
                     st.session_state.mc_current_index -= 1
@@ -486,7 +486,7 @@ else:
 
                     if st.button(
                         "View Results",
-                        use_container_width=True
+                        width="stretch"
                     ):
                         submit_quiz()
                         st.rerun()
@@ -496,7 +496,7 @@ else:
                     if st.button(
                         "Next",
                         disabled=current_index == total_questions - 1,
-                        use_container_width=True
+                        width="stretch"
                     ):
 
                         st.session_state.mc_current_index += 1
