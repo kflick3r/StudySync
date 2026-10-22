@@ -7,6 +7,12 @@ from google import genai
 import json
 import random
 
+
+# The Gemini model used by every generator. Change it here to
+# switch models everywhere.
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+
+
 # ------------------------
 # URL generation
 # URL construction approach developed with AI assistance
@@ -118,7 +124,7 @@ Course material:
 """
 
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
+        model=GEMINI_MODEL,
         contents=prompt
     )
 
@@ -131,6 +137,24 @@ Course material:
 # Gemini Prompt for Flashcards
 # JSON construction approach developed with AI assistance
 # -----------------------------
+
+# Helper function 
+# Validation check for generated flashcards
+def is_valid_flashcard(card):
+    """Return True if a flashcard has a non-empty question and answer."""
+
+    # Each flashcard must be a dictionary (a JSON object)
+    if not isinstance(card, dict):
+        return False
+
+    question = card.get("question")
+    answer = card.get("answer")
+
+    # Both fields must be strings with something other than spaces in them
+    return (
+        isinstance(question, str) and bool(question.strip())
+        and isinstance(answer, str) and bool(answer.strip())
+    )
 
 
 def generate_flashcards(course_material):
@@ -189,7 +213,7 @@ Course material:
 """
 
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
+        model=GEMINI_MODEL,
         contents=prompt,
         config={
             "response_mime_type": "application/json"
@@ -201,19 +225,15 @@ Course material:
     if not isinstance(flashcards, list):
         raise ValueError("Gemini did not return a list of flashcards.")
 
-    for card in flashcards:
-        if not isinstance(card, dict):
-            raise ValueError("Invalid flashcard format.")
+    # Keep only the valid flashcards, and cap the list at 10.
+    # One bad card no longer discards the whole batch.
+    flashcards = [c for c in flashcards if is_valid_flashcard(c)][:10]
 
-        if (
-            not isinstance(card.get("question"), str)
-            or not isinstance(card.get("answer"), str)
-            or not card["question"].strip()
-            or not card["answer"].strip()
-        ):
-            raise ValueError(
-                "Each flashcard must contain a non-empty question and answer."
-            )
+    # Only fail if nothing usable is left
+    if not flashcards:
+        raise ValueError(
+            "Gemini didn't return any valid flashcards. Please try again."
+        )
 
     return flashcards
 
@@ -325,12 +345,19 @@ Course material:
 """
 
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
+        model=GEMINI_MODEL,
         contents=prompt,
         config={
             "response_mime_type": "application/json"
         }
     )
+
+    # Convert Gemini's JSON text into a Python list
+    questions = json.loads(response.text)
+
+    # Make sure we got a list before filtering it
+    if not isinstance(questions, list):
+        raise ValueError("Gemini did not return a list of questions.")
 
     # Keep only the questions that pass validation, and cap the list
     # at 10. One bad question no longer discards the whole batch.
