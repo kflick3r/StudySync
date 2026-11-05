@@ -502,3 +502,153 @@ Course material:
         question["correct_answer"] = question["options"].index(correct_text)
 
     return questions
+
+
+# ---------------------------------------------------------
+# Gemini Prompt for Short Response Questions
+# ---------------------------------------------------------
+
+# Validation check for generated short response questions
+def is_valid_short_response(item):
+    """Return True if a short response question has the structure
+    the page expects."""
+
+    # Each item must be a dictionary (a JSON object)
+    if not isinstance(item, dict):
+        return False
+
+    question = item.get("question")
+    sample_answer = item.get("sample_answer")
+
+    # The question and sample answer must be non-empty strings
+    if (
+        not isinstance(question, str) or not question.strip()
+        or not isinstance(sample_answer, str) or not sample_answer.strip()
+    ):
+        return False
+
+    key_points = item.get("key_points")
+
+    # key_points must be a list of 2 to 5 non-empty strings
+    if (
+        not isinstance(key_points, list)
+        or not 2 <= len(key_points) <= 5
+        or any(not isinstance(p, str) or not p.strip() for p in key_points)
+    ):
+        return False
+
+    # Reuse the LaTeX check from the multiple choice section
+    texts = [question, sample_answer, *key_points]
+
+    if not all(has_valid_math_delimiters(t) for t in texts):
+        return False
+
+    return True
+
+# Gemini prompt call for short response questions
+def generate_short_response(course_material):
+    """Generate short response questions from course material."""
+
+    client = genai.Client(
+        api_key=st.secrets["GEMINI_API_KEY"]
+    )
+
+    prompt = rf"""
+You are an AI study assistant creating short response questions
+from a college student's course notes.
+
+Generate up to 5 short response questions using only the
+provided course material.
+
+SOURCE ACCURACY
+- Every question, sample answer, and key point must be consistent
+  with the supplied notes.
+- Do not introduce unsupported facts, examples, or concepts.
+- Each question must be answerable from the notes.
+- Generate fewer than 5 questions if the notes do not support
+  5 distinct, meaningful questions.
+
+QUESTION DESIGN
+- Each question should be answerable in 2 to 4 sentences.
+- Each question should test one learning objective.
+- Prefer questions that ask the student to explain, compare,
+  or apply a concept rather than recite a definition.
+- Do not generate questions that need a long essay to answer.
+- Avoid duplicate or nearly identical questions.
+
+SAMPLE ANSWER
+- Write a model answer of 2 to 4 sentences that a student could
+  compare their own answer against.
+
+KEY POINTS
+- Provide 2 to 5 key points per question.
+- Each key point is one short idea a good answer should include.
+- Together, the key points should cover the main ideas in the
+  sample answer.
+
+MATHEMATICAL NOTATION
+- Use LaTeX only when mathematical notation improves readability.
+- Wrap every mathematical expression in single dollar-sign
+  delimiters, such as $p(X)$.
+- Never output raw LaTeX commands outside math delimiters.
+- Escape LaTeX backslashes correctly inside JSON strings.
+- Do not use Markdown code fences or display-math delimiters.
+
+OUTPUT FORMAT
+Return ONLY a valid JSON array.
+
+Each object must contain:
+- "question": a nonempty string
+- "sample_answer": a nonempty string
+- "key_points": a list of 2 to 5 nonempty strings
+
+Do not include commentary or Markdown outside the JSON.
+
+Example:
+[
+    {{
+        "question": "Explain what tokenization is and why it is a useful first step in NLP.",
+        "sample_answer": "Tokenization splits text into smaller units called tokens, such as words or subwords. It is useful as a first step because later processing works on these units instead of raw text.",
+        "key_points": [
+            "Splits text into tokens",
+            "Tokens can be words or subwords",
+            "Later processing operates on tokens"
+        ]
+    }}
+]
+
+Do not use the example's subject matter unless it is supported
+by the student's notes.
+
+Course material:
+{course_material}
+"""
+
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json"
+        }
+    )
+
+    # Convert Gemini's JSON text into a Python list
+    items = json.loads(response.text)
+
+    # Make sure we got a list before filtering it
+    if not isinstance(items, list):
+        raise ValueError("Gemini did not return a list of questions.")
+
+    # Keep only the questions that pass validation, and cap the list
+    # at 5. One bad question no longer discards the whole batch.
+    items = [q for q in items if is_valid_short_response(q)][:5]
+
+    # Only fail if nothing usable is left
+    if not items:
+        raise ValueError(
+            "Gemini didn't return any valid questions. Please try again."
+        )
+
+    return items
+
+

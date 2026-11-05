@@ -25,7 +25,11 @@ def create_flashcards():
             st.success("Flashcards generated successfully!")
 
         except Exception as error:
-            st.error(f"Error generating flashcards: {error}")
+            # 503 means the model is overloaded, so show a friendly message
+            if getattr(error, "code", None) == 503:
+                st.warning("Sorry, we're busy right now. Try again soon!")
+            else:
+                st.error(f"Error generating flashcards: {error}")
 
 
 @st.dialog("Generate new flashcards?")

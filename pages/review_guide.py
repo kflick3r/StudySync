@@ -24,7 +24,11 @@ else:
                 st.session_state.review_guide = review_guide
 
             except Exception as e:
-                st.error(f"Unable to generate review guide: {e}")
+                # 503 means the model is overloaded, so show a friendly message
+                if getattr(e, "code", None) == 503:
+                    st.warning("Sorry, we're busy right now. Try again soon!")
+                else:
+                    st.error(f"Unable to generate review guide: {e}")
 
     # If a review guide has already been created, display it
     if "review_guide" in st.session_state:
