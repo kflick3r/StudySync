@@ -26,9 +26,11 @@ def generate_questions():
 
             st.session_state.sr_revealed = {}
 
+            st.session_state.sr_covered = {}
+
             # Clear answers typed for the old set of questions
             for key in list(st.session_state.keys()):
-                if key.startswith("sr_answer_"):
+                if key.startswith(("sr_answer_", "sr_point_")):
                     del st.session_state[key]
 
             st.success("Questions generated successfully!")
@@ -60,6 +62,9 @@ if "sr_answers" not in st.session_state:
 
 if "sr_revealed" not in st.session_state:
     st.session_state.sr_revealed = {}
+
+if "sr_covered" not in st.session_state:
+    st.session_state.sr_covered = {}
 
 # ------------------------------------
 # Generate Questions
@@ -132,9 +137,24 @@ else:
                 st.markdown("**Sample answer:**")
                 st.write(question["sample_answer"])
 
-                st.markdown("**Key points to look for:**")
-                for point in question["key_points"]:
-                    st.markdown(f"- {point}")
+                st.markdown("**Key points: tick the ones your answer covered**")
+
+                # This question's saved checkbox choices
+                covered = st.session_state.sr_covered.setdefault(
+                    current_index, {}
+                )
+
+                for i, point in enumerate(question["key_points"]):
+                    covered[i] = st.checkbox(
+                        point,
+                        value=covered.get(i, False),
+                        key=f"sr_point_{current_index}_{i}"
+                    )
+
+                st.write(
+                    f"You identified {sum(covered.values())} of "
+                    f"{len(question['key_points'])} key points in your self-assessment."
+                )
 
         # Navigation buttons
         left_spacer, previous_column, next_column, right_spacer = (
