@@ -24,6 +24,8 @@ def generate_questions():
             # Start with no saved answers for the new set
             st.session_state.sr_answers = {}
 
+            st.session_state.sr_revealed = {}
+
             # Clear answers typed for the old set of questions
             for key in list(st.session_state.keys()):
                 if key.startswith("sr_answer_"):
@@ -56,6 +58,9 @@ if "sr_current_index" not in st.session_state:
 if "sr_answers" not in st.session_state:
     st.session_state.sr_answers = {}
 
+if "sr_revealed" not in st.session_state:
+    st.session_state.sr_revealed = {}
+
 # ------------------------------------
 # Generate Questions
 # ------------------------------------
@@ -87,19 +92,49 @@ else:
         st.subheader("Your Questions")
         st.write(f"Question {current_index + 1} of {len(questions)}")
 
+        checked_count = len(st.session_state.sr_revealed)
+
+        st.progress(
+            checked_count / len(questions),
+            text=f"{checked_count} of {len(questions)} questions checked"
+        )
+
         with st.container(border=True):
 
             st.subheader(question["question"], anchor=False)
+            
+            # Has the student already checked this question?
+            revealed = current_index in st.session_state.sr_revealed
 
             answer = st.text_area(
-                "Your answer",
+                "Respond with 2-4 sentences:",
                 value=st.session_state.sr_answers.get(current_index, ""),
                 key=f"sr_answer_{current_index}",
-                height=150
+                height=150,
+                disabled=revealed
             )
 
             # Save what the student typed so it survives navigation
             st.session_state.sr_answers[current_index] = answer
+
+            if not revealed:
+
+                if st.button(
+                    "Check Answer",
+                    disabled=not answer.strip(),
+                    width="stretch"
+                ):
+                    st.session_state.sr_revealed[current_index] = True
+                    st.rerun()
+
+            else:
+
+                st.markdown("**Sample answer:**")
+                st.write(question["sample_answer"])
+
+                st.markdown("**Key points to look for:**")
+                for point in question["key_points"]:
+                    st.markdown(f"- {point}")
 
         # Navigation buttons
         left_spacer, previous_column, next_column, right_spacer = (
