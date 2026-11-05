@@ -17,6 +17,18 @@ def generate_questions():
             st.session_state.sr_questions = generate_short_response(
                 st.session_state.course_material
             )
+
+            # Start the new set at question 1
+            st.session_state.sr_current_index = 0
+
+            # Start with no saved answers for the new set
+            st.session_state.sr_answers = {}
+
+            # Clear answers typed for the old set of questions
+            for key in list(st.session_state.keys()):
+                if key.startswith("sr_answer_"):
+                    del st.session_state[key]
+
             st.success("Questions generated successfully!")
 
         except Exception as error:
@@ -38,6 +50,11 @@ st.write("Practice explaining concepts from your NLP course notes.")
 if "sr_questions" not in st.session_state:
     st.session_state.sr_questions = []
 
+if "sr_current_index" not in st.session_state:
+    st.session_state.sr_current_index = 0
+
+if "sr_answers" not in st.session_state:
+    st.session_state.sr_answers = {}
 
 # ------------------------------------
 # Generate Questions
@@ -61,9 +78,51 @@ else:
     if st.button(label):
         generate_questions()
 
-    # Temporary display so we can check the output
-    for i, item in enumerate(st.session_state.sr_questions):
-        st.write(f"{i + 1}. {item['question']}")
+    if st.session_state.sr_questions:
+
+        questions = st.session_state.sr_questions
+        current_index = st.session_state.sr_current_index
+        question = questions[current_index]
+
+        st.subheader("Your Questions")
+        st.write(f"Question {current_index + 1} of {len(questions)}")
+
+        with st.container(border=True):
+
+            st.subheader(question["question"], anchor=False)
+
+            answer = st.text_area(
+                "Your answer",
+                value=st.session_state.sr_answers.get(current_index, ""),
+                key=f"sr_answer_{current_index}",
+                height=150
+            )
+
+            # Save what the student typed so it survives navigation
+            st.session_state.sr_answers[current_index] = answer
+
+        # Navigation buttons
+        left_spacer, previous_column, next_column, right_spacer = (
+            st.columns([2, 1, 1, 2])
+        )
+
+        with previous_column:
+            if st.button(
+                "Previous",
+                disabled=current_index == 0,
+                width="stretch"
+            ):
+                st.session_state.sr_current_index -= 1
+                st.rerun()
+
+        with next_column:
+            if st.button(
+                "Next",
+                disabled=current_index == len(questions) - 1,
+                width="stretch"
+            ):
+                st.session_state.sr_current_index += 1
+                st.rerun()
 
 
 # ------------
