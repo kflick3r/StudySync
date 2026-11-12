@@ -48,10 +48,61 @@ def generate_questions():
     reset_attempt()
     st.success("Questions generated successfully!")
 
+@st.dialog("Generate new questions?")
+def confirm_regenerate():
+    st.write(
+        "This will replace your current questions and reset "
+        "your answers, self-assessments, and evaluations."
+    )
 
-def evaluate_questions():
+    cancel_col, confirm_col = st.columns(2)
+
+    with cancel_col:
+        if st.button("Cancel", width="stretch"):
+            st.rerun()
+
+    with confirm_col:
+        if st.button("Regenerate", type="primary", width="stretch"):
+            st.session_state.sr_regenerate = True
+            st.rerun()
+
+@st.dialog("Try these questions again?")
+def confirm_try_again():
+    st.write(
+        "This will reset your answers, self-assessments, and "
+        "Gemini evaluations so you can retry the same questions."
+    )
+
+    cancel_col, confirm_col = st.columns(2)
+
+    with cancel_col:
+        if st.button("Cancel", width="stretch"):
+            st.rerun()
+
+    with confirm_col:
+        if st.button("Try Again", type="primary", width="stretch"):
+            reset_attempt()
+            st.rerun()
+
+
+def save_answer_change(index):
+    """Save an edited answer and invalidate its previous evaluation."""
+
+    answer = st.session_state[f"sr_answer_{index}"]
+
+    if answer != st.session_state.sr_answers.get(index, ""):
+        st.session_state.sr_answers[index] = answer
+        st.session_state.sr_evaluations.pop(index, None)
+
+
+def evaluate_questions(message_container):
     """Evaluate checked answers, retaining successful results if a call fails."""
     questions = st.session_state.sr_questions
+
+    if len(st.session_state.sr_revealed) != len(questions):
+        st.warning("Please check all your answers before viewing results.")
+        return
+    
     pending = [
         i for i in range(len(questions))
         if i not in st.session_state.sr_evaluations
@@ -61,33 +112,39 @@ def evaluate_questions():
         st.session_state.sr_show_results = True
         return
 
-    with st.spinner("Evaluating your answers with Gemini..."):
-        for i in pending:
-            question = questions[i]
-            try:
-                # One automatic retry for Gemini errors
-                for attempt in range(2):
-                    try:
-                        evaluation = evaluate_short_response(
-                            question["question"],
-                            st.session_state.sr_answers[i],
-                            question["sample_answer"],
-                            question["key_points"],
+    with message_container.container():
+        with st.spinner("Evaluating your answers with Gemini..."):
+            for i in pending:
+                question = questions[i]
+                try:
+                    # One automatic retry for Gemini errors
+                    for attempt in range(2):
+                        try:
+                            evaluation = evaluate_short_response(
+                                question["question"],
+                                st.session_state.sr_answers[i],
+                                question["sample_answer"],
+                                question["key_points"],
+                            )
+                            break
+
+                        except ValueError:
+                            if attempt == 1:
+                                raise
+                except Exception as error:
+                    if getattr(error, "code", None) == 503:
+                        message_container.warning(
+                            "Gemini is busy right now. Please try View Results again soon!"
                         )
-                        break
+                    else:
+                        message_container.error(
+                            f"Could not evaluate question {i + 1}: {error}"
+                        )
+                    return
 
-                    except ValueError:
-                        if attempt == 1:
-                            raise
-            except Exception as error:
-                if getattr(error, "code", None) == 503:
-                    st.warning("Gemini is busy right now. Please try View Results again soon.")
-                else:
-                    st.error(f"Could not evaluate question {i + 1}: {error}")
-                return
+                st.session_state.sr_evaluations[i] = evaluation
 
-            st.session_state.sr_evaluations[i] = evaluation
-
+    message_container.empty()
     st.session_state.sr_show_results = True
 
 
@@ -166,12 +223,16 @@ def show_results():
 
             st.table(comparison_data)
 
-    left, right = st.columns(2)
-    with left:
+    retry_col, regenerate_col, back_col = st.columns(3)
+    with retry_col:
         if st.button("Try Again", width="stretch"):
-            reset_attempt()
-            st.rerun()
-    with right:
+            confirm_try_again()
+
+    with regenerate_col:
+        if st.button("Regenerate Questions", width="stretch"):
+            confirm_regenerate()
+
+    with back_col:
         if st.button("Back to Questions", width="stretch"):
             st.session_state.sr_show_results = False
             st.rerun()
@@ -192,6 +253,7 @@ initial_state = {
     "sr_covered": {},
     "sr_evaluations": {},
     "sr_show_results": False,
+    "sr_regenerate": False,
 }
 for key, default in initial_state.items():
     if key not in st.session_state:
@@ -209,6 +271,14 @@ if not st.session_state.get("course_material"):
     )
 
 else:
+    # Handle confirmed regeneration from either page
+    if st.session_state.sr_regenerate:
+        st.session_state.sr_regenerate = False
+        generate_questions()
+
+        # Refresh the page after successful generation
+        st.rerun()
+
     if st.session_state.sr_show_results and st.session_state.sr_questions:
         show_results()
     else:
@@ -217,25 +287,12 @@ else:
             if st.session_state.sr_questions
             else "Generate Questions"
         )
-        if st.session_state.sr_questions:
-            # Warning that regenerating questions will erase any previous work
-            with st.popover("Regenerate Questions", use_container_width=True):
-                st.warning(
-                    "Generating new questions will erase your current "
-                    "answers, self-assessments, and results."
-                )
 
-                if st.button(
-                    "Yes, Regenerate Questions",
-                    type="primary",
-                    width="stretch"
-                ):
-                    generate_questions()
-                    st.rerun()
-        else:
-            if st.button("Generate Questions"):
+        if st.button(label):
+            if st.session_state.sr_questions:
+                confirm_regenerate()
+            else:
                 generate_questions()
-                st.rerun()
 
         if st.session_state.sr_questions:
             questions = st.session_state.sr_questions
@@ -267,17 +324,21 @@ else:
                     key=answer_key,
                     height=150,
                     disabled=revealed,
+                    on_change=save_answer_change,
+                    args=(current_index,),
                 )
                 if not revealed:
                     st.session_state.sr_answers[current_index] = answer
                     if st.button(
                         "Check Answer",
-                        disabled=not answer.strip(),
                         width="stretch",
                     ):
-                        st.session_state.sr_answers[current_index] = answer
-                        st.session_state.sr_revealed[current_index] = True
-                        st.rerun()
+                        if not answer.strip():
+                            st.warning("Please enter an answer before checking.")
+                        else:
+                            st.session_state.sr_answers[current_index] = answer
+                            st.session_state.sr_revealed[current_index] = True
+                            st.rerun()
                 else:
                     st.markdown("**Sample Answer:**")
                     st.write(question["sample_answer"])
@@ -294,6 +355,18 @@ else:
                         f"You identified {sum(covered.values())} of "
                         f"{len(question['key_points'])} key points in your self-assessment."
                     )
+                    if st.button("Edit Answer", key=f"sr_edit_{current_index}"):
+                        st.session_state.sr_revealed.pop(current_index, None)
+                        st.session_state.sr_evaluations.pop(current_index, None)
+                        st.session_state.sr_covered.pop(current_index, None)
+
+                        for key in list(st.session_state.keys()):
+                            if key.startswith(f"sr_point_{current_index}_"):
+                                del st.session_state[key]
+
+                        st.rerun()
+
+            evaluation_message = st.empty()
 
             left_spacer, previous_column, next_column, right_spacer = st.columns(
                 [2, 1, 1, 2]
@@ -314,7 +387,7 @@ else:
                         disabled=not all_checked,
                         width="stretch"
                     ):
-                        evaluate_questions()
+                        evaluate_questions(evaluation_message)
 
                         if st.session_state.sr_show_results:
                             st.rerun()
