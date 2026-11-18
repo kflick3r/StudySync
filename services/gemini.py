@@ -3,6 +3,7 @@ from urllib.parse import quote_plus
 
 import streamlit as st
 from google import genai
+from google.genai import types
 
 import json
 import random
@@ -10,7 +11,7 @@ import random
 
 # The Gemini model used by every generator. Change it here to
 # switch models everywhere.
-GEMINI_MODEL = "gemini-3.5-flash-lite"
+GEMINI_MODEL = "gemini-3.1-flash-lite"
 
 
 # ------------------------
@@ -460,7 +461,6 @@ Course material:
 {course_material}
 """
 
-
     response = client.models.generate_content(
         model=GEMINI_MODEL,
         contents=prompt,
@@ -550,7 +550,13 @@ def generate_short_response(course_material):
     """Generate short response questions from course material."""
 
     client = genai.Client(
-        api_key=st.secrets["GEMINI_API_KEY"]
+        api_key=st.secrets["GEMINI_API_KEY"],
+        http_options=types.HttpOptions(
+            timeout=30000,
+            retry_options=types.HttpRetryOptions(
+                attempts=1
+            )
+        )
     )
 
     prompt = rf"""
@@ -635,7 +641,9 @@ Course material:
     # Convert Gemini's JSON text into a Python list
     try:
         items = json.loads(response.text)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError):
+        print("RAW GEMINI RESPONSE:")
+        print(repr(response.text))
         raise ValueError(
             "Gemini returned a response that wasn't valid. Please try again."
         )
@@ -709,7 +717,13 @@ def evaluate_short_response(question, student_answer, sample_answer, key_points)
     """Evaluate a student's short response using Gemini."""
 
     client = genai.Client(
-        api_key=st.secrets["GEMINI_API_KEY"]
+        api_key=st.secrets["GEMINI_API_KEY"],
+        http_options=types.HttpOptions(
+            timeout=30000,
+            retry_options=types.HttpRetryOptions(
+                attempts=1
+            )
+        )
     )
 
     prompt = rf"""
@@ -785,8 +799,20 @@ FEEDBACK
 - Keep feedback specific to the student's response.
 - Do not exaggerate mistakes or give unnecessary criticism.
 - Avoid rewarding an answer simply for being longer.
+
+FEEDBACK STYLE
 - Address the student directly using "you" and "your".
-- Do not refer to the student in the third person.
+- Never refer to the student in the third person.
+- Do not use phrases such as "the student", "the learner",
+  or "the response demonstrates".
+- Write feedback as a supportive tutor speaking directly
+  to the person who submitted the answer.
+- Keep feedback concise, specific, and constructive.
+- If the answer contains no correct information, say so
+  directly rather than inventing something positive.
+- Do not praise the student simply for submitting an answer.
+- Apply these rules to strengths, improvements, and
+  overall_assessment.
 
 MATHEMATICAL NOTATION
 - Use LaTeX only when mathematical notation improves readability.
@@ -807,10 +833,10 @@ Return ONLY a valid JSON object with these fields:
 Example structure:
 {{
     "score": 4,
-    "strengths": "The student correctly explains...",
-    "improvements": "The response could better address...",
-    "stronger_answer": "A stronger answer would...",
-    "overall_assessment": "The student demonstrates...",
+    "strengths": "You correctly explained...",
+    "improvements": "You could improve your answer by...",
+    "stronger_answer": "An accurate example answer...",
+    "overall_assessment": "You demonstrate...",
     "key_point_evaluations": [true, true, false]
 }}
 

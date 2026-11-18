@@ -116,6 +116,7 @@ def evaluate_questions(message_container):
         with st.spinner("Evaluating your answers with Gemini..."):
             for i in pending:
                 question = questions[i]
+                print(f"Starting evaluation for question {i + 1}", flush=True)
                 try:
                     # One automatic retry for Gemini errors
                     for attempt in range(2):
@@ -143,8 +144,17 @@ def evaluate_questions(message_container):
                     return
 
                 st.session_state.sr_evaluations[i] = evaluation
+                
+                print(
+                    f"Completed evaluation for question {i + 1}: "
+                    f"{evaluation['score']}/5",
+                    flush=True
+                )
 
     message_container.empty()
+
+    print("All evaluations complete. Opening results page.", flush=True)
+
     st.session_state.sr_show_results = True
 
 
@@ -157,7 +167,7 @@ def show_results():
     st.markdown("### Your Results")
     st.markdown("#### Average Gemini Score:")
     st.metric(
-        label="",
+        label="Average Gemini Score",
         value=f"{sum(scores) / len(scores):.1f} / 5",
         label_visibility="collapsed"
     )
