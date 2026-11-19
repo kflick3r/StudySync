@@ -1,5 +1,6 @@
 # StudySync
 **AI Study Buddy: An Interactive Study Companion for Students**
+**Live Application:** [StudySync](https://study-sync-study-buddy.streamlit.app/)
 
 StudySync is an AI-assisted study application designed to help students turn their own course materials into personalized and interactive study resources.
 
@@ -7,7 +8,7 @@ Rather than simply providing answers, StudySync acts as a study companion that h
 
 The application uses Google's Gemini API to generate study materials and provide feedback based on student-provided course content.
 
-![StudySync landing page](images/landing-page.png)
+![StudySync Landing Page](images/landing_page.png)
 
 ## Project Status
 
@@ -79,10 +80,7 @@ Generates open-ended questions that encourage students to explain concepts in th
 
 Gemini's evaluations are intended as study feedback rather than definitive grades.
 
-<p align="center">
-  <img src="images/short_response.png" width="48%" alt="Short Response Question">
-  <img src="images/gemini_eval_short_response.png" width="48%" alt="Gemini's Evaluation of the Short Response Answer">
-</p>
+![Short Response Questions](images/check_answer_short_response.png)
 
 ### Shared Course Material
 
