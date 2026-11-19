@@ -7,6 +7,8 @@ Rather than simply providing answers, StudySync acts as a study companion that h
 
 The application uses Google's Gemini API to generate study materials and provide feedback based on student-provided course content.
 
+![StudySync landing page](images/landing-page.png)
+
 ## Project Status
 
 **MVP Complete — Deployed and Tested**
@@ -21,6 +23,8 @@ All four study modes are functional in the deployed application.
 
 Students provide their own NLP course notes or study materials as plain text or Markdown. StudySync uses that material as context for four interactive study modes.
 
+![Study Tools Dashboard](images/dashboard.png)
+
 ### Review Guide
 
 Generates a structured review guide from the provided course material.
@@ -30,6 +34,8 @@ Generates a structured review guide from the provided course material.
 - Explains key ideas and relationships.
 - Provides Google Search links for additional verification and exploration.
 
+![Review Guide](images/review_guide.png)
+
 ### Flashcards
 
 Generates interactive flashcards for reviewing important terms and concepts.
@@ -38,6 +44,11 @@ Generates interactive flashcards for reviewing important terms and concepts.
 - Allows students to reveal or hide answers.
 - Supports navigation between cards.
 - Includes a shuffle option for additional practice.
+  
+<p align="center">
+  <img src="images/flashcards-hidden.png" width="48%" alt="Flashcard with answer hidden">
+  <img src="images/flashcards-revealed.png" width="48%" alt="Flashcard with answer revealed">
+</p>
 
 ### Multiple Choice
 
@@ -49,6 +60,8 @@ Generates multiple-choice questions based on the provided course material.
 - Tracks progress through the question set.
 - Displays a results summary.
 - Allows students to retry questions.
+
+![Multiple Choice](images/multiple_choice.png)
 
 ### Short Response
 
@@ -65,6 +78,11 @@ Generates open-ended questions that encourage students to explain concepts in th
 - Supports retrying questions or generating a new question set.
 
 Gemini's evaluations are intended as study feedback rather than definitive grades.
+
+<p align="center">
+  <img src="images/short_response.png" width="48%" alt="Short Response Question">
+  <img src="images/gemini_eval_short_response.png" width="48%" alt="Gemini's Evaluation of the Short Response Answer">
+</p>
 
 ### Shared Course Material
 
@@ -140,7 +158,7 @@ To run StudySync locally:
 5. Launch the Streamlit application using its main entry-point file.
 
    ```bash
-   streamlit run landing.py
+   streamlit run app.py
    ```
 
    The application will open in a local web browser.
